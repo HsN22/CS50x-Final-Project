@@ -33,7 +33,7 @@ def apology(message, code=400):
         return s
     return render_template("apology.html", top=code, bottom=escape(message)), code
 
-def interpolate(T):
+def get_vg_temperature(T):
     # Calculate specific volume using ideal gas equation, given Temperature
     # Assume given Temperature (do one for given Pressure?)
     # Assume given R&M table and need to interpolate to get Pressure if Temperature NOT in the table
@@ -45,6 +45,15 @@ def interpolate(T):
     R = 461.5
     P_Pa = P_bar * 100000
     vg = R * (T+273.15) / P_Pa
+    
+    return vg
+
+def get_vg_pressure(P):
+    T_C = np.interp(P, P_data, Tsat_data)
+    R = 461.5
+    T_K = T_C + 273.15
+    # Convert P to Pa?
+    vg = R * T / P
     
     return vg
 

@@ -1,14 +1,17 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Quote
+    Specific Volume
 {% endblock %}
 
 {% block main %}
 
-    <form action = "/" method = "post">
+    <form action = "/specific" method = "post">
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="temperature" name="temperature" placeholder="Temperature" type="text">
+        </div>
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="pressure" name="pressue" placeholder="Pressure" type="text">
         </div>
         <button class="btn btn-primary" type="submit">Calculate</button>
     </form>

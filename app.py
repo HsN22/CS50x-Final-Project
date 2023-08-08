@@ -71,7 +71,15 @@ def adibatic():
         print(s_fg)
         x = (pressurecalc - s_f) / s_fg
         print(x)
-        return render_template("adibaticres.html" , pressurecalc=pressurecalc)
+        hf = db.execute("SELECT enthalpy_kJ_kg FROM TemperatureL WHERE temperature_c = ?", temperature)
+        hg = db.execute("SELECT enthalpy_kJ_kg FROM TemperatureV WHERE temperature_c = ?", temperature)
+        for row in hf:
+            h_f = row["enthalpy_kJ_kg"]
+        for row in hg:
+            h_g = row["enthalpy_kJ_kg"]
+        h_fg = h_g - h_f
+        h2 = h_f + x*h_fg
+        return render_template("adibaticres.html" , h2=h2)
     else:
         return render_template("adibatic.html")
         

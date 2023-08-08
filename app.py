@@ -1,81 +1,31 @@
 import os
 import sqlite3
-from flask import Flask, flash, jsonify, redirect, render_template, request, session
+from cs50 import SQL
+from flask import Flask, flash, redirect, render_template, request, session
+from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from functions import apology, get_vg_temperature
 
 # Configure application
 app = Flask(__name__)
 
+# Configure session to use filesystem (instead of signed cookies)
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
+
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-db = SQLAlchemy(app)
-
-
-
-class PressureL(db.Model):
-    __tablename__ = 'PressureL'
-    id = db.Column(db.BIGINT, primary_key=True)
-    pressure_bar = db.Column(db.FLOAT)
-    temperature_c = db.Column(db.FLOAT)
-    volume_m3_kg = db.Column(db.FLOAT)
-    u_kJ_kg = db.Column(db.FLOAT)
-    enthalpy_kJ_kg = db.Column(db.FLOAT)
-    entropy_J_gK = db.Column(db.FLOAT)
-    phase = db.Column(db.TEXT)
-
-class PressureV(db.Model):
-    __tablename__ = 'PressureV'
-    id = db.Column(db.BIGINT, primary_key=True)
-    pressure_bar = db.Column(db.FLOAT)
-    temperature_c = db.Column(db.FLOAT)
-    volume_m3_kg = db.Column(db.FLOAT)
-    u_kJ_kg = db.Column(db.FLOAT)
-    enthalpy_kJ_kg = db.Column(db.FLOAT)
-    entropy_J_gK = db.Column(db.FLOAT)
-    phase = db.Column(db.TEXT)
-
-class TemperatureL(db.Model):
-    __tablename__ = 'TemperatureL'
-    id = db.Column(db.BIGINT, primary_key=True)
-    temperature_c = db.Column(db.FLOAT)
-    pressure_bar = db.Column(db.FLOAT)
-    volume_m3_kg = db.Column(db.FLOAT)
-    u_kJ_kg = db.Column(db.FLOAT)
-    enthalpy_kJ_kg = db.Column(db.FLOAT)
-    entropy_J_gK = db.Column(db.FLOAT)
-    phase = db.Column(db.TEXT)
-
-class TemperatureV(db.Model):
-    __tablename__ = 'TemperatureV'
-    id = db.Column(db.BIGINT, primary_key=True)
-    temperature_c = db.Column(db.FLOAT)
-    pressure_bar = db.Column(db.FLOAT)
-    volume_m3_kg = db.Column(db.FLOAT)
-    u_kJ_kg = db.Column(db.FLOAT)
-    enthalpy_kJ_kg = db.Column(db.FLOAT)
-    entropy_J_gK = db.Column(db.FLOAT)
-    phase = db.Column(db.TEXT)
-
-
-def fetch_data_from_table(table_name):
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-    cursor.execute(f"SELECT * FROM {table_name}")
-    data = cursor.fetchall()
-    conn.close()
-    return data
-
+db = SQL("sqlite:///database.db")
 
 
 @app.route('/')
 def properties():
-    pressure_l_data = fetch_data_from_table('PressureL')
-    pressure_v_data = fetch_data_from_table('PressureV')
-    temperature_l_data = fetch_data_from_table('TemperatureL')
-    temperature_v_data = fetch_data_from_table('TemperatureV')
+    pressure_l_data = db.execute("SELECT * FROM PressureL")
+    pressure_v_data = db.execute("SELECT * FROM PressureV")
+    temperature_l_data = db.execute("SELECT * FROM TemperatureL")
+    temperature_v_data = db.execute("SELECT * FROM TemperatureV")
 
     return render_template('properties.html',
                            pressure_l_data=pressure_l_data,
@@ -96,7 +46,32 @@ def specific():
     
     else:
         return render_template("specific.html")
-    
+
+
 @app.route("/adibatic", methods=["GET", "POST"])
-def specific():
-    pass
+def adibatic():
+    if request.method == "POST":
+        pressure = request.form.get("pressure")
+        temperature = request.form.get("temperature")
+        #return f"Pressure: {pressure}"
+        pressure = float(pressure)
+        temperature = float(temperature)
+        initial_entropy = db.execute("SELECT entropy_J_gK FROM PressureV WHERE pressure_bar = ?", pressure)
+        # Get pressure from list of dictionary
+        for row in initial_entropy:
+            pressurecalc = row["entropy_J_gK"]
+        # print(pressurecalc)
+        sf = db.execute("SELECT entropy_J_gK FROM TemperatureL WHERE temperature_c = ?", temperature)
+        sg = db.execute("SELECT entropy_J_gK FROM TemperatureV WHERE temperature_c = ?", temperature)
+        for row in sf:
+            s_f = row["entropy_J_gK"]
+        for row in sg:
+            s_g = row["entropy_J_gK"]
+        s_fg = s_g - s_f
+        print(s_fg)
+        x = (pressurecalc - s_f) / s_fg
+        print(x)
+        return render_template("adibaticres.html" , pressurecalc=pressurecalc)
+    else:
+        return render_template("adibatic.html")
+        

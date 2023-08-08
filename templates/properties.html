@@ -10,7 +10,6 @@
         <table class="table mx-auto">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Pressure (bar)</th>
                     <th>Temperature (C)</th>
                     <th>Volume (m3/kg)</th>
@@ -23,14 +22,13 @@
             <tbody>
                 {% for data in pressure_l_data %}
                 <tr>
-                    <td>{{ data[0] }}</td>
-                    <td>{{ data[1] }}</td>
-                    <td>{{ data[2] }}</td>
-                    <td>{{ data[3] }}</td>
-                    <td>{{ data[4] }}</td>
-                    <td>{{ data[5] }}</td>
-                    <td>{{ data[6] }}</td>
-                    <td>{{ data[7] }}</td>
+                    <td>{{ data.pressure_bar }}</td>
+                    <td>{{ data.temperature_c }}</td>
+                    <td>{{ data.volume_m3_kg }}</td>
+                    <td>{{ data.u_kJ_kg }}</td>#
+                    <td>{{ data.enthalpy_kJ_kg }}</td>
+                    <td>{{ data.entropy_J_gK }}</td>
+                    <td>{{ data.phase }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -40,7 +38,6 @@
         <table class="table mx-auto">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Pressure (bar)</th>
                     <th>Temperature (C)</th>
                     <th>Volume (m3/kg)</th>
@@ -53,14 +50,13 @@
             <tbody>
                 {% for data in pressure_v_data %}
                 <tr>
-                    <td>{{ data[0] }}</td>
-                    <td>{{ data[1] }}</td>
-                    <td>{{ data[2] }}</td>
-                    <td>{{ data[3] }}</td>
-                    <td>{{ data[4] }}</td>
-                    <td>{{ data[5] }}</td>
-                    <td>{{ data[6] }}</td>
-                    <td>{{ data[7] }}</td>
+                    <td>{{ data.pressure_bar }}</td>
+                    <td>{{ data.temperature_c }}</td>
+                    <td>{{ data.volume_m3_kg }}</td>
+                    <td>{{ data.u_kJ_kg }}</td>#
+                    <td>{{ data.enthalpy_kJ_kg }}</td>
+                    <td>{{ data.entropy_J_gK }}</td>
+                    <td>{{ data.phase }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -70,7 +66,6 @@
         <table class="table mx-auto">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Temperature (C)</th>
                     <th>Pressure (bar)</th>
                     <th>Volume (m3/kg)</th>
@@ -83,14 +78,13 @@
             <tbody>
                 {% for data in temperature_l_data %}
                 <tr>
-                    <td>{{ data[0] }}</td>
-                    <td>{{ data[1] }}</td>
-                    <td>{{ data[2] }}</td>
-                    <td>{{ data[3] }}</td>
-                    <td>{{ data[4] }}</td>
-                    <td>{{ data[5] }}</td>
-                    <td>{{ data[6] }}</td>
-                    <td>{{ data[7] }}</td>
+                    <td>{{ data.temperature_c }}</td>
+                    <td>{{ data.pressure_bar }}</td>
+                    <td>{{ data.volume_m3_kg }}</td>
+                    <td>{{ data.u_kJ_kg }}</td>#
+                    <td>{{ data.enthalpy_kJ_kg }}</td>
+                    <td>{{ data.entropy_J_gK }}</td>
+                    <td>{{ data.phase }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -100,7 +94,6 @@
         <table class="table mx-auto">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Temperature (C)</th>
                     <th>Pressure (bar)</th>
                     <th>Volume (m3/kg)</th>
@@ -113,14 +106,13 @@
             <tbody>
                 {% for data in temperature_v_data %}
                 <tr>
-                    <td>{{ data[0] }}</td>
-                    <td>{{ data[1] }}</td>
-                    <td>{{ data[2] }}</td>
-                    <td>{{ data[3] }}</td>
-                    <td>{{ data[4] }}</td>
-                    <td>{{ data[5] }}</td>
-                    <td>{{ data[6] }}</td>
-                    <td>{{ data[7] }}</td>
+                    <td>{{ data.temperature_c }}</td>
+                    <td>{{ data.pressure_bar }}</td>
+                    <td>{{ data.volume_m3_kg }}</td>
+                    <td>{{ data.u_kJ_kg }}</td>#
+                    <td>{{ data.enthalpy_kJ_kg }}</td>
+                    <td>{{ data.entropy_J_gK }}</td>
+                    <td>{{ data.phase }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

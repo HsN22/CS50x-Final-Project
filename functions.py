@@ -3,7 +3,7 @@ import numpy as np
 
 from flask import redirect, render_template, session
 from functools import wraps
-
+'''
 data = np.array([[0.5,81.3,3.239],
     [1,99.6,1.694],
     [10,179.9,0.1944],
@@ -18,7 +18,7 @@ data = np.array([[0.5,81.3,3.239],
 P_data = data[:,0]
 Tsat_data = data[:,1]
 vg_data = data[:,2]
-
+'''
 def apology(message, code=400):
     """Render message as an apology to user."""
     def escape(s):
@@ -33,7 +33,7 @@ def apology(message, code=400):
         return s
     return render_template("apology.html", top=code, bottom=escape(message)), code
 
-def get_vg_temperature(T):
+def get_vg_temperature(T, P_data, Tsat_data):
     # Calculate specific volume using ideal gas equation, given Temperature
     # Assume given Temperature (do one for given Pressure?)
     # Assume given R&M table and need to interpolate to get Pressure if Temperature NOT in the table
@@ -48,12 +48,13 @@ def get_vg_temperature(T):
     
     return vg
 
-def get_vg_pressure(P):
+def get_vg_pressure(P, P_data, Tsat_data):
     T_C = np.interp(P, P_data, Tsat_data)
     R = 461.5
     T_K = T_C + 273.15
     # Convert P to Pa?
-    vg = R * T / P
+    Pa = P * 100000
+    vg = R * T_K / Pa
     
     return vg
 

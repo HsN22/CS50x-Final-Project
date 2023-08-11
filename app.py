@@ -1,10 +1,11 @@
 import os
 import sqlite3
+import numpy as np
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
-from functions import apology, get_vg_temperature
+from functions import apology, get_vg_temperature, get_vg_pressure
 
 # Configure application
 app = Flask(__name__)
@@ -38,14 +39,42 @@ def properties():
 @app.route("/specific", methods=["GET", "POST"])
 def specific():
     if request.method == "POST":
-        temperature = request.form.get("temperature")
         #Remember to validate users input, don't convert to float straight away
-        temperature = float(temperature)
-        v_g = get_vg_temperature(temperature)
-        return render_template("result.html", v = v_g)
-    
+        temperature = request.form.get("temperature")
+        pressure = request.form.get("pressure")
+        #if not temperature or pressure:
+        #    return apology("Enter either T or P, not both or empty")
+        #else:
+        #if not pressure:
+            
+
+        #Get T_sat_data and p_sat from database and convert to numpy array
+        list_of_dictionaries = db.execute("SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureV UNION SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureL")
+        # Convert the list of dictionaries to a list of tuples (Tsat, Pressure)
+        data_tuples = [(item['pressure_bar'], item['temperature_c'], item['volume_m3_kg']) for item in list_of_dictionaries]
+        # Remove every second item in list of tuples
+        data_tuples_filtered = data_tuples[::2]
+
+        # Convert the list of tuples to a numpy array
+        data_array = np.array(data_tuples_filtered)
+        P_data = data_array[:, 0]
+        Tsat_data = data_array[:, 1]
+
+        # Check if user provides one input, not both or empty
+        if (temperature and not pressure) or (pressure and not temperature):
+            if temperature:
+                temperature = float(temperature)
+                v_g = get_vg_temperature(temperature, P_data, Tsat_data)
+            else:
+                pressure = float(pressure)
+                v_g = get_vg_pressure(pressure, P_data, Tsat_data)
+            return render_template("result.html", v = v_g)
+        else:
+            return apology("Enter either T or P, not both or empty")      
     else:
-        return render_template("specific.html")
+        #list_of_dictionaries = db.execute("SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureV UNION SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureL")
+        #list_of_dictionaries = db.execute("SELECT pv.pressure_bar, pv.temperature_c, pv.volume_m3_kg AS volume_m3_kg_vapor, pl.volume_m3_kg AS volume_m3_kg_liquid FROM PressureV pv JOIN PressureL pl ON pv.pressure_bar = pl.pressure_bar AND pv.temperature_c = pl.temperature_c")
+        return render_template("specific.html")#,list_of_dictionaries=list_of_dictionaries)
 
 
 @app.route("/adibatic", methods=["GET", "POST"])

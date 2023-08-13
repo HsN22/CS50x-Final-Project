@@ -1,11 +1,11 @@
 import os
 import sqlite3
 import numpy as np
+import matplotlib.pyplot as plt
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
-from flask_sqlalchemy import SQLAlchemy
-from functions import apology, get_vg_temperature, get_vg_pressure
+from functions import apology, get_vg_temperature, get_vg_pressure, get_vg_Affandi, calc_error, get_h2
 
 # Configure application
 app = Flask(__name__)
@@ -42,12 +42,12 @@ def specific():
         #Remember to validate users input, don't convert to float straight away
         temperature = request.form.get("temperature")
         pressure = request.form.get("pressure")
-        #if not temperature or pressure:
-        #    return apology("Enter either T or P, not both or empty")
-        #else:
-        #if not pressure:
-            
-
+        vg_dict = db.execute("SELECT volume_m3_kg FROM PressureV")
+        hmm = []
+        for j in vg_dict:
+            hmm.append(j["volume_m3_kg"])
+        vg_array = np.array(hmm)
+        
         #Get T_sat_data and p_sat from database and convert to numpy array
         list_of_dictionaries = db.execute("SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureV UNION SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureL")
         # Convert the list of dictionaries to a list of tuples (Tsat, Pressure)
@@ -59,22 +59,50 @@ def specific():
         data_array = np.array(data_tuples_filtered)
         P_data = data_array[:, 0]
         Tsat_data = data_array[:, 1]
+        vg_data = vg_array
 
         # Check if user provides one input, not both or empty
         if (temperature and not pressure) or (pressure and not temperature):
             if temperature:
                 temperature = float(temperature)
                 v_g = get_vg_temperature(temperature, P_data, Tsat_data)
+                affandi_v_g = get_vg_Affandi(temperature)
+
+                tempdict = db.execute("SELECT temperature_c FROM PressureL")
+                tuplesz = []
+                for i in tempdict:
+                    tuplesz.append(i["temperature_c"])
+                #nparray = np.array(tuplesz)
+                #print(nparray)
+
+                temps = np.array(tuplesz)
+                err1 = np.zeros_like(temps)
+                err2 = np.zeros_like(temps)
+                for i in np.arange(0,len(temps),1):
+                    err1[i], err2[i] = calc_error(temps[i], Tsat_data, vg_data, P_data)
+                
+                plt.plot(temps,abs(err1),'ob-',temps,abs(err2),'^r-')
+                plt.xlabel('Temperature [Celsius]')
+                plt.ylabel('Error [%]')
+                plt.gca().legend(('Ideal Gas Method','Affandi et al. Method'))
+                # Save the graph as an image
+                plt.savefig('static/error_graph.png')  # Save in the 'static' folder
+                plt.close()  # Clear the figure
+                
             else:
                 pressure = float(pressure)
                 v_g = get_vg_pressure(pressure, P_data, Tsat_data)
-            return render_template("result.html", v = v_g)
+            return render_template("result.html", v = v_g, affandi_v_g = affandi_v_g)
         else:
             return apology("Enter either T or P, not both or empty")      
     else:
-        #list_of_dictionaries = db.execute("SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureV UNION SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureL")
-        #list_of_dictionaries = db.execute("SELECT pv.pressure_bar, pv.temperature_c, pv.volume_m3_kg AS volume_m3_kg_vapor, pl.volume_m3_kg AS volume_m3_kg_liquid FROM PressureV pv JOIN PressureL pl ON pv.pressure_bar = pl.pressure_bar AND pv.temperature_c = pl.temperature_c")
-        return render_template("specific.html")#,list_of_dictionaries=list_of_dictionaries)
+        vg_dict = db.execute("SELECT volume_m3_kg FROM PressureV")
+        hmm = []
+        for j in vg_dict:
+            hmm.append(j["volume_m3_kg"])
+        vg_data = np.array(hmm)
+        print(vg_data)
+        return render_template("specific.html", vg_data=vg_data)
 
 
 @app.route("/adibatic", methods=["GET", "POST"])
@@ -82,14 +110,25 @@ def adibatic():
     if request.method == "POST":
         pressure = request.form.get("pressure")
         temperature = request.form.get("temperature")
-        #return f"Pressure: {pressure}"
-        pressure = float(pressure)
-        temperature = float(temperature)
+        
+        if not pressure or not temperature:
+            return apology("Enter values for both temperature and pressure")
+        
+        try:
+            pressure = float(pressure)
+            temperature = float(temperature)
+        except ValueError:
+            return apology("Enter valid positive numbers for temperature and pressure")
+            
+        if pressure <= 0 or temperature <= 0:
+            return apology("Both temperature and pressure must be positive numbers")
+        
         initial_entropy = db.execute("SELECT entropy_J_gK FROM PressureV WHERE pressure_bar = ?", pressure)
-        # Get pressure from list of dictionary
+
+        # Get pressure from list of dictionaries
         for row in initial_entropy:
             pressurecalc = row["entropy_J_gK"]
-        # print(pressurecalc)
+
         sf = db.execute("SELECT entropy_J_gK FROM TemperatureL WHERE temperature_c = ?", temperature)
         sg = db.execute("SELECT entropy_J_gK FROM TemperatureV WHERE temperature_c = ?", temperature)
         for row in sf:
@@ -97,9 +136,7 @@ def adibatic():
         for row in sg:
             s_g = row["entropy_J_gK"]
         s_fg = s_g - s_f
-        print(s_fg)
-        x = (pressurecalc - s_f) / s_fg
-        print(x)
+
         hf = db.execute("SELECT enthalpy_kJ_kg FROM TemperatureL WHERE temperature_c = ?", temperature)
         hg = db.execute("SELECT enthalpy_kJ_kg FROM TemperatureV WHERE temperature_c = ?", temperature)
         for row in hf:
@@ -107,8 +144,12 @@ def adibatic():
         for row in hg:
             h_g = row["enthalpy_kJ_kg"]
         h_fg = h_g - h_f
-        h2 = h_f + x*h_fg
+        
+        h2 = get_h2(pressurecalc, s_g, s_f, s_fg, h_f, h_g, h_fg)
+
         return render_template("adibaticres.html" , h2=h2)
+        
+    
     else:
         return render_template("adibatic.html")
         

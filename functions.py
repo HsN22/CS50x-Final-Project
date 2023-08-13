@@ -3,22 +3,7 @@ import numpy as np
 
 from flask import redirect, render_template, session
 from functools import wraps
-'''
-data = np.array([[0.5,81.3,3.239],
-    [1,99.6,1.694],
-    [10,179.9,0.1944],
-    [20,212.4,0.09957],
-    [40,250.3,0.04977],
-    [100,311,0.01802],
-    [150,342.1,0.01035],
-    [180,357,0.00751],
-    [200,365.7,0.00585],
-    [220,373.7,0.00368]])
 
-P_data = data[:,0]
-Tsat_data = data[:,1]
-vg_data = data[:,2]
-'''
 def apology(message, code=400):
     """Render message as an apology to user."""
     def escape(s):
@@ -57,4 +42,42 @@ def get_vg_pressure(P, P_data, Tsat_data):
     vg = R * T_K / Pa
     
     return vg
+
+def get_vg_Affandi(T):
+    
+    a = -7.75883
+    b = 3.23753
+    c = 2.05755
+    d = -0.06052
+    e = 0.00529
+    
+    Tcrit = 647.096
+    # Tr is the reduced temperature which is defined as T/Tcr. Tcr is critical temperature; for steam it is 647.096 K
+    Tr = (T+273.15)/Tcrit   
+    
+    log_vg = a + b * (np.log(1/Tr))**0.4 + c/Tr**2 + d/Tr**4 + e/Tr**5
+    
+    vg = np.exp(log_vg)
+    
+    return vg
+
+def calc_error(T, Tsat_data, vg_data, P_data):
+    vg_table = np.interp(T,Tsat_data,vg_data)
+    
+    # Now get the data using the ideal gas method
+    vg_idealgas = get_vg_temperature(T, P_data, Tsat_data)
+    
+    # Now get the data using the Affandi method
+    vg_Affandi = get_vg_Affandi(T)
+    
+    # Now get the errors
+    Error_ideal_gas = (100 * ( vg_table - vg_idealgas) / vg_table)
+    Error_Affandi = (100 * ( vg_table - vg_Affandi) / vg_table)
+    
+    return Error_ideal_gas, Error_Affandi
+
+def get_h2(pressurecalc, s_g, s_f, s_fg, h_f, h_g, h_fg):
+    x = (pressurecalc - s_f) / s_fg
+    h2 = h_f + x*h_fg
+    return h2
 

@@ -5,7 +5,8 @@
 {% endblock %}
 
 {% block main %}
-    <p>Calculate the specific volume for low pressures, using the ideal gas equation</p>
+    <p>Calculate the specific volume of saturated vapor using the ideal gas equation and Affandi equation</p>
+    <p>Enter a value for Temperature or Pressure, not both</p>
     <form action = "/specific" method = "post">
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="temperature" name="temperature" placeholder="Temperature" type="text">
@@ -15,28 +16,5 @@
         </div>
         <button class="btn btn-primary" type="submit">Calculate</button>
     </form>
+    {{ vg_data }}
 {% endblock %}
-<!-- 
-    <h1 class="text-center">Pressure Data</h1>
-    <table class="table mx-auto">
-        <thead>
-            <tr>
-                <th>Pressure (bar)</th>
-                <th>Temperature (C)</th>
-                <th>Specific Volume (m³/kg)</th>
-                <th>Phase</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for data in list_of_dictionaries %}
-            <tr>
-                <td>{{ data.pressure_bar }}</td>
-                <td>{{ data.temperature_c }}</td>
-                <td>{{ data.volume_m3_kg }}</td>
-                <td>{{ data.phase }}</td>
-
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
--->

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
-from functions import apology, get_vg_temperature, get_vg_pressure, get_vg_Affandi, calc_error, get_h2
+from functions import apology, get_vg_temperature, get_vg_pressure, get_vg_Affandi, calc_error, get_h2, interpolate_temp, interpolate_press
 
 # Configure application
 app = Flask(__name__)
@@ -20,6 +20,17 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 db = SQL("sqlite:///database.db")
 
+# Global
+list_of_dictionaries = db.execute("SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureV UNION SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureL")
+# Convert the list of dictionaries to a list of tuples (Tsat, Pressure)
+data_tuples = [(item['pressure_bar'], item['temperature_c'], item['volume_m3_kg']) for item in list_of_dictionaries]
+# Remove every second item in list of tuples
+data_tuples_filtered = data_tuples[::2]
+
+# Convert the list of tuples to a numpy array
+data_array = np.array(data_tuples_filtered)
+P_data = data_array[:, 0]
+Tsat_data = data_array[:, 1]
 
 @app.route('/')
 def properties():
@@ -33,6 +44,54 @@ def properties():
                            pressure_v_data=pressure_v_data,
                            temperature_l_data=temperature_l_data,
                            temperature_v_data=temperature_v_data)
+
+
+@app.route("/temperature", methods=["GET", "POST"])
+def temperature():
+    if request.method == "POST":
+        pressure = request.form.get("pressure")
+        P = float(pressure)
+        
+        #list_of_dictionaries = db.execute("SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureV UNION SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureL")
+        # Convert the list of dictionaries to a list of tuples (Tsat, Pressure)
+        #data_tuples = [(item['pressure_bar'], item['temperature_c'], item['volume_m3_kg']) for item in list_of_dictionaries]
+        # Remove every second item in list of tuples
+        #data_tuples_filtered = data_tuples[::2]
+
+        # Convert the list of tuples to a numpy array
+        #data_array = np.array(data_tuples_filtered)
+        #P_data = data_array[:, 0]
+        #Tsat_data = data_array[:, 1]
+
+        temp = interpolate_temp(P, P_data, Tsat_data)
+        return render_template("tempresult.html", temp=temp)
+    
+    else:
+        return render_template("temperature.html")
+
+
+@app.route("/pressure", methods=["GET", "POST"])
+def pressure():
+    if request.method == "POST":
+        temperature = request.form.get("temperature")
+        T = float(temperature)
+
+        #list_of_dictionaries = db.execute("SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureV UNION SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureL")
+        # Convert the list of dictionaries to a list of tuples (Tsat, Pressure)
+        #data_tuples = [(item['pressure_bar'], item['temperature_c'], item['volume_m3_kg']) for item in list_of_dictionaries]
+        # Remove every second item in list of tuples
+        #data_tuples_filtered = data_tuples[::2]
+
+        # Convert the list of tuples to a numpy array
+        #data_array = np.array(data_tuples_filtered)
+        #P_data = data_array[:, 0]
+        #Tsat_data = data_array[:, 1]
+
+        pressure = interpolate_press(T, Tsat_data, P_data)
+        return render_template("pressresult.html", pressure=pressure)
+
+    else:
+        return render_template("pressure.html")
 
 
 
@@ -49,16 +108,16 @@ def specific():
         vg_array = np.array(hmm)
         
         #Get T_sat_data and p_sat from database and convert to numpy array
-        list_of_dictionaries = db.execute("SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureV UNION SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureL")
+        #list_of_dictionaries = db.execute("SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureV UNION SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureL")
         # Convert the list of dictionaries to a list of tuples (Tsat, Pressure)
-        data_tuples = [(item['pressure_bar'], item['temperature_c'], item['volume_m3_kg']) for item in list_of_dictionaries]
+        #data_tuples = [(item['pressure_bar'], item['temperature_c'], item['volume_m3_kg']) for item in list_of_dictionaries]
         # Remove every second item in list of tuples
-        data_tuples_filtered = data_tuples[::2]
+        #data_tuples_filtered = data_tuples[::2]
 
         # Convert the list of tuples to a numpy array
-        data_array = np.array(data_tuples_filtered)
-        P_data = data_array[:, 0]
-        Tsat_data = data_array[:, 1]
+        #data_array = np.array(data_tuples_filtered)
+        #P_data = data_array[:, 0]
+        #Tsat_data = data_array[:, 1]
         vg_data = vg_array
 
         # Check if user provides one input, not both or empty
@@ -96,13 +155,7 @@ def specific():
         else:
             return apology("Enter either T or P, not both or empty")      
     else:
-        vg_dict = db.execute("SELECT volume_m3_kg FROM PressureV")
-        hmm = []
-        for j in vg_dict:
-            hmm.append(j["volume_m3_kg"])
-        vg_data = np.array(hmm)
-        print(vg_data)
-        return render_template("specific.html", vg_data=vg_data)
+        return render_template("specific.html")
 
 
 @app.route("/adibatic", methods=["GET", "POST"])

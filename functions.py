@@ -18,6 +18,21 @@ def apology(message, code=400):
         return s
     return render_template("apology.html", top=code, bottom=escape(message)), code
 
+def interpolate_temp(P, P_data, Tsat_data):
+
+    T_C = np.interp(P, P_data, Tsat_data)
+
+    return T_C
+
+def interpolate_press(T,Tsat_data, P_data):
+
+    P_bar = np.interp(T,Tsat_data, P_data)
+
+    return P_bar
+
+
+
+
 def get_vg_temperature(T, P_data, Tsat_data):
     # Calculate specific volume using ideal gas equation, given Temperature
     # Assume given Temperature (do one for given Pressure?)

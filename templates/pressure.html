@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Result
+{% endblock %}
+
+{% block main %}
+
+    <form action = "/pressure" method = "post">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="temperature" name="temperature" placeholder="Temperature" type="text">
+        </div>
+        <button class="btn btn-primary" type="submit">Calculate</button>
+    </form>
+
+{% endblock %}

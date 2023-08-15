@@ -18,11 +18,11 @@ def apology(message, code=400):
         return s
     return render_template("apology.html", top=code, bottom=escape(message)), code
 
-def interpolate_temp(P, P_data, Tsat_data):
+#def interpolate_temp(P, P_data, Tsat_data):
 
-    T_C = np.interp(P, P_data, Tsat_data)
+ #   T_C = np.interp(P, P_data, Tsat_data)
 
-    return T_C
+  #  return T_C
 
 def interpolate_press(T,Tsat_data, P_data):
 
@@ -30,8 +30,43 @@ def interpolate_press(T,Tsat_data, P_data):
 
     return P_bar
 
+def Buck(T):
+    P = 0.61121*np.exp((18.678-(T/234.5))*((T)/(257.14+T)))
+    P_bar = P /100
+    return P_bar
 
+def Affandi_pressure(T):
+    a = 9.56756
+    b = 5.39806
+    c = -6.16183
+    d = 1.49572
+    e = 0.43300
+    
+    Tcrit = 647.096 #K
+    
+    Tr = (T + 273.15) /Tcrit 
+    
+    log_P = a + b*np.log(Tr) + c*(np.log(Tr))**2 + d*(np.log(Tr))**4 + e*(Tr)**5
+    
+    P = np.exp(log_P)
+    P_bar = P / 100
+    
+    return P_bar
 
+def calc_error_pressure(T, Tsat_data, P_data):
+    P_bar = np.interp(T,Tsat_data, P_data)
+    
+    # Now get the data using the Arden Buck method
+    P_Buck = Buck(T)
+    
+    # Now get the data using the Affandi method
+    P_Affandi = Affandi_pressure(T)
+    
+    # Now get the errors
+    Error_Buck = (100 * ( P_bar - P_Buck) / P_bar)
+    Error_Affandi = (100 * ( P_bar - P_Affandi) / P_bar)
+    
+    return Error_Buck, Error_Affandi
 
 def get_vg_temperature(T, P_data, Tsat_data):
     # Calculate specific volume using ideal gas equation, given Temperature
@@ -45,16 +80,6 @@ def get_vg_temperature(T, P_data, Tsat_data):
     R = 461.5
     P_Pa = P_bar * 100000
     vg = R * (T+273.15) / P_Pa
-    
-    return vg
-
-def get_vg_pressure(P, P_data, Tsat_data):
-    T_C = np.interp(P, P_data, Tsat_data)
-    R = 461.5
-    T_K = T_C + 273.15
-    # Convert P to Pa?
-    Pa = P * 100000
-    vg = R * T_K / Pa
     
     return vg
 

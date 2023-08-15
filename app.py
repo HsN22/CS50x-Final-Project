@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
-from functions import apology, get_vg_temperature, get_vg_pressure, get_vg_Affandi, calc_error, get_h2, interpolate_temp, interpolate_press
+from functions import apology, get_vg_temperature, get_vg_Affandi, calc_error, get_h2, interpolate_press, Buck, Affandi_pressure, calc_error_pressure
 
 # Configure application
 app = Flask(__name__)
@@ -32,6 +32,12 @@ data_array = np.array(data_tuples_filtered)
 P_data = data_array[:, 0]
 Tsat_data = data_array[:, 1]
 
+tempdict = db.execute("SELECT temperature_c FROM PressureL")
+tuplesz = []
+for i in tempdict:
+    tuplesz.append(i["temperature_c"])
+
+
 @app.route('/')
 def properties():
     pressure_l_data = db.execute("SELECT * FROM PressureL")
@@ -45,51 +51,39 @@ def properties():
                            temperature_l_data=temperature_l_data,
                            temperature_v_data=temperature_v_data)
 
-
-@app.route("/temperature", methods=["GET", "POST"])
-def temperature():
-    if request.method == "POST":
-        pressure = request.form.get("pressure")
-        P = float(pressure)
-        
-        #list_of_dictionaries = db.execute("SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureV UNION SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureL")
-        # Convert the list of dictionaries to a list of tuples (Tsat, Pressure)
-        #data_tuples = [(item['pressure_bar'], item['temperature_c'], item['volume_m3_kg']) for item in list_of_dictionaries]
-        # Remove every second item in list of tuples
-        #data_tuples_filtered = data_tuples[::2]
-
-        # Convert the list of tuples to a numpy array
-        #data_array = np.array(data_tuples_filtered)
-        #P_data = data_array[:, 0]
-        #Tsat_data = data_array[:, 1]
-
-        temp = interpolate_temp(P, P_data, Tsat_data)
-        return render_template("tempresult.html", temp=temp)
-    
-    else:
-        return render_template("temperature.html")
-
-
 @app.route("/pressure", methods=["GET", "POST"])
 def pressure():
     if request.method == "POST":
         temperature = request.form.get("temperature")
-        T = float(temperature)
-
-        #list_of_dictionaries = db.execute("SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureV UNION SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureL")
-        # Convert the list of dictionaries to a list of tuples (Tsat, Pressure)
-        #data_tuples = [(item['pressure_bar'], item['temperature_c'], item['volume_m3_kg']) for item in list_of_dictionaries]
-        # Remove every second item in list of tuples
-        #data_tuples_filtered = data_tuples[::2]
-
-        # Convert the list of tuples to a numpy array
-        #data_array = np.array(data_tuples_filtered)
-        #P_data = data_array[:, 0]
-        #Tsat_data = data_array[:, 1]
+        try:
+            T = float(temperature)
+        except ValueError:
+            return apology("Enter valid positive numbers for temperature")
+            
+        if T <= 0:
+            return apology("Temperature must be a positive number")
+        #T = float(temperature)
 
         pressure = interpolate_press(T, Tsat_data, P_data)
-        return render_template("pressresult.html", pressure=pressure)
+        buck_pressure = Buck(T)
+        affandi_press = Affandi_pressure(T)
 
+        temps = np.array(tuplesz)
+        err1 = np.zeros_like(temps)
+        err2 = np.zeros_like(temps)
+        for i in np.arange(0,len(temps),1):
+            err1[i], err2[i] = calc_error_pressure(temps[i], Tsat_data, P_data)
+        import matplotlib.pyplot as plt
+        plt.plot(temps,abs(err1),'ob-',temps,abs(err2),'^r-')
+        plt.xlabel('Temperature [Celsius]')
+        plt.ylabel('Error [%]')
+        plt.gca().legend(('Arden Buck Method','Affandi et al. Method'))
+        plt.savefig('static/error_graph_p.png')  # Save in the 'static' folder
+        plt.close()  # Clear the figure
+
+        return render_template("pressresult.html", pressure=pressure, buck_pressure=buck_pressure, affandi_press=affandi_press)
+        #temps = np.array([81.3,99.6,179.9,212.4,250.3,311,342.1,357,365.7,373.7])
+        
     else:
         return render_template("pressure.html")
 
@@ -100,60 +94,46 @@ def specific():
     if request.method == "POST":
         #Remember to validate users input, don't convert to float straight away
         temperature = request.form.get("temperature")
-        pressure = request.form.get("pressure")
+
+        # Check if user provides one input
+        if not temperature:
+            return apology("Enter a Temperature")
+
+        try:
+            temperature = float(temperature)
+        except ValueError:
+            return apology("Enter valid positive numbers for temperature")
+            
+        if temperature <= 0:
+            return apology("Temperature must be a positive number")
+
         vg_dict = db.execute("SELECT volume_m3_kg FROM PressureV")
         hmm = []
         for j in vg_dict:
             hmm.append(j["volume_m3_kg"])
         vg_array = np.array(hmm)
         
-        #Get T_sat_data and p_sat from database and convert to numpy array
-        #list_of_dictionaries = db.execute("SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureV UNION SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureL")
-        # Convert the list of dictionaries to a list of tuples (Tsat, Pressure)
-        #data_tuples = [(item['pressure_bar'], item['temperature_c'], item['volume_m3_kg']) for item in list_of_dictionaries]
-        # Remove every second item in list of tuples
-        #data_tuples_filtered = data_tuples[::2]
-
-        # Convert the list of tuples to a numpy array
-        #data_array = np.array(data_tuples_filtered)
-        #P_data = data_array[:, 0]
-        #Tsat_data = data_array[:, 1]
         vg_data = vg_array
 
-        # Check if user provides one input, not both or empty
-        if (temperature and not pressure) or (pressure and not temperature):
-            if temperature:
-                temperature = float(temperature)
-                v_g = get_vg_temperature(temperature, P_data, Tsat_data)
-                affandi_v_g = get_vg_Affandi(temperature)
+        vg_table = np.interp(temperature,Tsat_data,vg_data)
+        v_g = get_vg_temperature(temperature, P_data, Tsat_data)
+        affandi_v_g = get_vg_Affandi(temperature)
 
-                tempdict = db.execute("SELECT temperature_c FROM PressureL")
-                tuplesz = []
-                for i in tempdict:
-                    tuplesz.append(i["temperature_c"])
-                #nparray = np.array(tuplesz)
-                #print(nparray)
-
-                temps = np.array(tuplesz)
-                err1 = np.zeros_like(temps)
-                err2 = np.zeros_like(temps)
-                for i in np.arange(0,len(temps),1):
-                    err1[i], err2[i] = calc_error(temps[i], Tsat_data, vg_data, P_data)
-                
-                plt.plot(temps,abs(err1),'ob-',temps,abs(err2),'^r-')
-                plt.xlabel('Temperature [Celsius]')
-                plt.ylabel('Error [%]')
-                plt.gca().legend(('Ideal Gas Method','Affandi et al. Method'))
-                # Save the graph as an image
-                plt.savefig('static/error_graph.png')  # Save in the 'static' folder
-                plt.close()  # Clear the figure
-                
-            else:
-                pressure = float(pressure)
-                v_g = get_vg_pressure(pressure, P_data, Tsat_data)
-            return render_template("result.html", v = v_g, affandi_v_g = affandi_v_g)
-        else:
-            return apology("Enter either T or P, not both or empty")      
+        temps = np.array(tuplesz)
+        err1 = np.zeros_like(temps)
+        err2 = np.zeros_like(temps)
+        for i in np.arange(0,len(temps),1):
+            err1[i], err2[i] = calc_error(temps[i], Tsat_data, vg_data, P_data)
+        
+        plt.plot(temps,abs(err1),'ob-',temps,abs(err2),'^r-')
+        plt.xlabel('Temperature [Celsius]')
+        plt.ylabel('Error [%]')
+        plt.gca().legend(('Ideal Gas Method','Affandi et al. Method'))
+        # Save the graph as an image
+        plt.savefig('static/error_graph.png')  # Save in the 'static' folder
+        plt.close()  # Clear the figure
+        return render_template("result.html",vg_table=vg_table, v = v_g, affandi_v_g = affandi_v_g)
+                 
     else:
         return render_template("specific.html")
 

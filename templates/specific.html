@@ -6,13 +6,9 @@
 
 {% block main %}
     <p>Calculate the specific volume of saturated vapor using the ideal gas equation and Affandi equation</p>
-    <p>Enter a value for Temperature or Pressure, not both</p>
     <form action = "/specific" method = "post">
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="temperature" name="temperature" placeholder="Temperature" type="text">
-        </div>
-        <div class="mb-3">
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="pressure" name="pressure" placeholder="Pressure" type="text">
         </div>
         <button class="btn btn-primary" type="submit">Calculate</button>
     </form>

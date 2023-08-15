@@ -5,12 +5,12 @@
 {% endblock %}
 
 {% block main %}
-
+    <p>Calculate the Saturated Pressure using tables, Arden Buck method and the Affandi et al. method</p>
     <form action = "/pressure" method = "post">
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="temperature" name="temperature" placeholder="Temperature" type="text">
         </div>
         <button class="btn btn-primary" type="submit">Calculate</button>
     </form>
-
+<!--Buck (1996), Buck Research CR-1A User's Manual, Appendix 1.-->
 {% endblock %}

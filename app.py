@@ -18,7 +18,7 @@ Session(app)
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
-db = SQL("sqlite:///database.db")
+db = SQL("sqlite:///databaseplus.db") # Using heated steam db
 
 # Global
 list_of_dictionaries = db.execute("SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureV UNION SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureL")
@@ -40,10 +40,13 @@ for i in tempdict:
 
 @app.route('/')
 def properties():
+    # Data from NIST website
     pressure_l_data = db.execute("SELECT * FROM PressureL")
     pressure_v_data = db.execute("SELECT * FROM PressureV")
     temperature_l_data = db.execute("SELECT * FROM TemperatureL")
     temperature_v_data = db.execute("SELECT * FROM TemperatureV")
+
+    # Data from R&M tables
 
     return render_template('properties.html',
                            pressure_l_data=pressure_l_data,
@@ -62,7 +65,6 @@ def pressure():
             
         if T <= 0:
             return apology("Temperature must be a positive number")
-        #T = float(temperature)
 
         pressure = interpolate_press(T, Tsat_data, P_data)
         buck_pressure = Buck(T)
@@ -136,6 +138,49 @@ def specific():
                  
     else:
         return render_template("specific.html")
+
+
+@app.route("/heated", methods=["GET", "POST"])
+def heated():
+    if request.method == "POST":
+        # Get user input
+        pressure = request.form.get("pressure")
+        temperature = request.form.get("temperature")
+
+        # Check if the fields are empty
+        if not pressure and not temperature:
+            return apology("Enter both fields")
+
+        # Check if the input are numbers
+        try:
+            pressure = float(pressure)
+            temperature = float(temperature)
+        except ValueError:
+            return apology("Enter valid positive numbers for temperature and pressure")
+
+        # Is the data in the super heated table for interpolation to work?
+        if (pressure >= 0 and pressure <= 4 and temperature >= 50) or (pressure >= 5 and temperature >= 200):
+            # For the given pressure
+            # Get the temperature of the immediate and previous of the users input
+            # Get the volume of the corresponding immediate temp and the previous temp
+            # Perform interpolation
+            immediate_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
+            previous_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
+            next_temp = immediate_temp[0]["sat_T_c"]
+            prev_temp = previous_temp[0]["sat_T_c"]
+            immediate_v = db.execute("SELECT v FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", next_temp, pressure)
+            previous_v = db.execute("SELECT v FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", prev_temp, pressure)
+            next_v = immediate_v[0]["v"]
+            prev_v = previous_v[0]["v"]
+            v_interp = ((temperature - prev_temp) / (next_temp - prev_temp)) * (next_v - prev_v) + prev_v
+            return render_template("resultstwo.html", next_temp=next_temp, prev_temp=prev_temp, next_v=next_v, prev_v=prev_v, v_interp=v_interp)
+        else:
+            return apology("The data entered are not in the super heated steam region")
+
+    else:
+        return render_template("heated.html")
+
+
 
 
 @app.route("/adibatic", methods=["GET", "POST"])

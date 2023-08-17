@@ -1,5 +1,4 @@
 import sqlite3
-
 import pandas as pd
 from sqlalchemy import create_engine
 
@@ -15,8 +14,8 @@ def convert_excel_to_database(excel_file, database_file):
     df.to_sql(table_name, engine, if_exists='replace', index=False)
 
 if __name__ == "__main__":
-    excel_files = ['PressureL.xlsx', 'PressureV.xlsx', 'TemperatureL.xlsx', 'TemperatureV.xlsx']
-    database_file = 'database.db'
+    excel_files = ['PressureL.xlsx', 'PressureV.xlsx', 'TemperatureL.xlsx', 'TemperatureV.xlsx', 'super_heated_steam.xlsx', 'critical_heated_steam.xlsx']
+    database_file = 'databaseplus.db'
 
     for file in excel_files:
         convert_excel_to_database(file, database_file)

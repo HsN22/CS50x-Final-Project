@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Superheated & Critical Steam
+{% endblock %}
+
+{% block main %}
+
+    <form action="/heated" method="POST">
+        <label for="calcType">Select what to calculate:</label>
+        <select id="calcType" name="calcType">
+            <option value="" selected disabled>Select an option</option>
+            <option value="specific_volume">Specific Volume</option>
+            <!--<option value="temperature">Temperature</option>-->
+            <!--More properties later-->
+        </select>
+        
+        <div id="inputContainer" style="display: none;">
+            <label for="temperature">Temperature:</label>
+            <input type="text" id="temperature" name="temperature" step="0.01">
+            
+            <label for="pressure">Pressure:</label>
+            <input type="text" id="pressure" name="pressure" step="0.01">
+            
+            <button type="submit">Calculate</button>
+        </div>
+    </form>
+
+    <script>
+        const calcTypeSelect = document.getElementById('calcType');
+        const inputContainer = document.getElementById('inputContainer');
+
+        calcTypeSelect.addEventListener('change', function() {
+            const selectedOption = calcTypeSelect.value;
+
+            if (selectedOption === 'specific_volume') {
+                inputContainer.style.display = 'block';
+            } else {
+                inputContainer.style.display = 'none';
+            }
+        });
+    </script>
+
+{% endblock %}

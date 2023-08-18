@@ -5,23 +5,25 @@
 {% endblock %}
 
 {% block main %}
-
+    <!--Is hardcoding the options good practice or use for loop, array like in Froshims example?-->
     <form action="/heated" method="POST">
         <label for="calcType">Select what to calculate:</label>
         <select id="calcType" name="calcType">
-            <option value="" selected disabled>Select an option</option>
+            <option disabled selected>Select an option</option>
             <option value="specific_volume">Specific Volume</option>
             <!--<option value="temperature">Temperature</option>-->
             <!--More properties later-->
+            <option value="specific_volume">Internal Energy</option>
+            <option value="specific_volume">Specific Enthalpy</option>
+            <option value="specific_volume">Specific Entropy</option>
         </select>
         
         <div id="inputContainer" style="display: none;">
-            <label for="temperature">Temperature:</label>
-            <input type="text" id="temperature" name="temperature" step="0.01">
+
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="temperature" name="temperature" placeholder="Temperature" type="text">
             
-            <label for="pressure">Pressure:</label>
-            <input type="text" id="pressure" name="pressure" step="0.01">
-            
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="pressure" name="pressure" placeholder="Pressure" type="text">
+
             <button type="submit">Calculate</button>
         </div>
     </form>

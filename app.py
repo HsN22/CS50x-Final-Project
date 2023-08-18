@@ -159,11 +159,24 @@ def heated():
             return apology("Enter valid positive numbers for temperature and pressure")
 
         # Is the data in the super heated table for interpolation to work?
-        if (pressure >= 0 and pressure <= 4 and temperature >= 50) or (pressure >= 5 and temperature >= 200):
-            # For the given pressure
-            # Get the temperature of the immediate and previous of the users input
-            # Get the volume of the corresponding immediate temp and the previous temp
-            # Perform interpolation
+        # For the given pressure
+        # Get the temperature of the immediate and previous of the users input
+        # Get the volume of the corresponding immediate temp and the previous temp
+        # Perform interpolation
+        # Unacceptable temps, already in table, no need for interpolation
+        unacceptable = [50, 100, 150, 200, 250, 300, 350, 375, 400, 425, 450, 500, 550, 600, 700, 800]
+        super_heated_data = db.execute("SELECT p, sat_T_c, v FROM super_heated_steam")
+        critical_heated_data = db.execute("SELECT p, sat_T_c, v FROM critical_heated_steam")
+        combined = super_heated_data + critical_heated_data
+        # Check if temperature and associated data exits in table, if so, output them
+        vol = None
+        for i in combined:
+            if i["sat_T_c"] == temperature and i["p"] == pressure:
+                vol = i["v"]
+                break
+        if vol is not None:
+            return render_template("resultstwoexisting.html", v_exists=vol)
+        if (pressure >= 0 and pressure <= 4 and temperature >= 50 and temperature not in unacceptable) or (pressure >= 5 and pressure <= 221.2 and temperature >= 200):
             immediate_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
             previous_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
             next_temp = immediate_temp[0]["sat_T_c"]
@@ -174,10 +187,25 @@ def heated():
             prev_v = previous_v[0]["v"]
             v_interp = ((temperature - prev_temp) / (next_temp - prev_temp)) * (next_v - prev_v) + prev_v
             return render_template("resultstwo.html", next_temp=next_temp, prev_temp=prev_temp, next_v=next_v, prev_v=prev_v, v_interp=v_interp)
+        elif (pressure >= 225 and pressure <= 1000 and temperature >= 350):
+            immediate_tempsc = db.execute("SELECT sat_T_c FROM critical_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
+            previous_tempsc = db.execute("SELECT sat_T_c FROM critical_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
+            next_tempsc = immediate_tempsc[0]["sat_T_c"]
+            prev_tempsc = previous_tempsc[0]["sat_T_c"]
+            immediate_vsc = db.execute("SELECT v FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", next_tempsc, pressure)
+            previous_vsc = db.execute("SELECT v FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", prev_tempsc, pressure)
+            next_vsc = immediate_vsc[0]["v"]
+            prev_vsc = previous_vsc[0]["v"]
+            v_interpsc = ((temperature - prev_tempsc) / (next_tempsc - prev_tempsc)) * (next_vsc - prev_vsc) + prev_vsc
+            return render_template("resultstwosc.html", next_tempsc=next_tempsc, prev_tempsc=prev_tempsc, next_vsc=next_vsc, prev_vsc=prev_vsc, v_interpsc=v_interpsc)
         else:
-            return apology("The data entered are not in the super heated steam region")
+            return apology("The data entered are not in the super heated steam or critical heated region")
 
     else:
+        #super_heated_data = db.execute("SELECT sat_T_c, v FROM super_heated_steam")
+        #critical_heated_data = db.execute("SELECT sat_T_c, v FROM critical_heated_steam")
+        #combined = super_heated_data + critical_heated_data
+        #print(combined)
         return render_template("heated.html")
 
 

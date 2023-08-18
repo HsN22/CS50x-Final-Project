@@ -11,11 +11,10 @@
         <select id="calcType" name="calcType">
             <option disabled selected>Select an option</option>
             <option value="specific_volume">Specific Volume</option>
-            <!--<option value="temperature">Temperature</option>-->
             <!--More properties later-->
-            <option value="specific_volume">Internal Energy</option>
-            <option value="specific_volume">Specific Enthalpy</option>
-            <option value="specific_volume">Specific Entropy</option>
+            <option value="internal_energy">Internal Energy</option>
+            <option value="specific_enthalpy">Specific Enthalpy</option>
+            <option value="specific_entropy">Specific Entropy</option>
         </select>
         
         <div id="inputContainer" style="display: none;">
@@ -35,7 +34,7 @@
         calcTypeSelect.addEventListener('change', function() {
             const selectedOption = calcTypeSelect.value;
 
-            if (selectedOption === 'specific_volume') {
+            if (selectedOption === 'specific_volume' || selectedOption === 'internal_energy' || selectedOption === 'specific_enthalpy' || selectedOption === 'specific_entropy') {
                 inputContainer.style.display = 'block';
             } else {
                 inputContainer.style.display = 'none';

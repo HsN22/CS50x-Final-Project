@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Result Two
+{% endblock %}
+
+{% block main %}
+
+    <p>T1 is {{ next_temp }} C</p> 
+    <p>T0 is {{ prev_temp }} C</p>
+    <p>V1 is {{ next_h }} m3/kg</p> 
+    <p>V0 is {{ prev_h }} m3/kg</p>
+
+    <p>Interpolated specific Enthalpy is {{ h_interp }} kJ/kg</p>
+    
+{% endblock %}

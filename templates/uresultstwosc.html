@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Result Two
+{% endblock %}
+
+{% block main %}
+
+    <p>T1 is {{ next_tempsc }} C</p> 
+    <p>T0 is {{ prev_tempsc }} C</p>
+    <p>V1 is {{ next_usc }} m3/kg</p> 
+    <p>V0 is {{ prev_usc }} m3/kg</p>
+
+    <p>Interpolated Internal Energy is {{ u_interpsc }} kJ/kg</p>
+    
+{% endblock %}

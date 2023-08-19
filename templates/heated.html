@@ -17,13 +17,18 @@
             <option value="specific_entropy">Specific Entropy</option>
         </select>
         
-        <div id="inputContainer" style="display: none;">
-
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="temperature" name="temperature" placeholder="Temperature" type="text">
+        <div id="inputContainer" style="display: none; margin-top: 20px;">
             
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="pressure" name="pressure" placeholder="Pressure" type="text">
+            <div class="mb-3">
+                <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="pressure" name="pressure" placeholder="Pressure (Bar)" type="text">
+            </div>
+            
+            <div class="mb-3">
+                <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="temperature" name="temperature" placeholder="Temperature (°C)" type="text">
+            </div>
 
-            <button type="submit">Calculate</button>
+            <button class="btn btn-primary" type="submit">Calculate</button>
+
         </div>
     </form>
 

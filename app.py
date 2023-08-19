@@ -166,9 +166,20 @@ def heated():
         # Perform interpolation
         # Unacceptable temps, already in table, no need for interpolation
         #unacceptable = [50, 100, 150, 200, 250, 300, 350, 375, 400, 425, 450, 500, 550, 600, 700, 800]
+
+
+
         super_heated_data = db.execute("SELECT p, sat_T_c, v, u, h, s FROM super_heated_steam")
         critical_heated_data = db.execute("SELECT p, sat_T_c, v, h, s FROM critical_heated_steam")
         combined = super_heated_data + critical_heated_data
+        # Check if pressure input is in the table
+        pressure_values = []
+        for row in combined:
+            pressure_values.append(row["p"])
+        
+        if pressure not in pressure_values:
+            return apology("Need to interpolate Pressure or it does not exist in the table")
+
         if selection == "specific_volume":
             # Check if temperature and associated data exits in table, if so, output them
             vol = None
@@ -212,7 +223,7 @@ def heated():
                     break
             if u is not None:
                 return render_template("uresultexist.html", u_exists=u)
-            if (pressure >= 0 and pressure <= 4 and temperature >= 50) or (pressure >= 5 and pressure <= 221.2 and temperature >= 200):
+            if (pressure >= 0 and pressure <= 4 and temperature >= 50) or (pressure >= 5 and pressure <= 70 and temperature >= 200):
                 immediate_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
                 previous_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
                 next_temp = immediate_temp[0]["sat_T_c"]
@@ -223,8 +234,8 @@ def heated():
                 prev_u = previous_u[0]["u"]
                 u_interp = ((temperature - prev_temp) / (next_temp - prev_temp)) * (next_u - prev_u) + prev_u
                 return render_template("uresultstwo.html", next_temp=next_temp, prev_temp=prev_temp, next_u=next_u, prev_u=prev_u, u_interp=u_interp)
-            elif (pressure >= 225 and pressure <= 1000 and temperature >= 350):
-                return apology("There is no u in the critical heated region")
+            elif (pressure >= 80 and pressure <= 1000 and temperature >= 350):
+                return apology("There is no u in the from 80 bar in the super heated region and in critical heated region")
             else:
                 return apology("The data entered are not in the super heated steam or critical heated region")
         elif selection == "specific_enthalpy":

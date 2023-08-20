@@ -18,9 +18,10 @@ Session(app)
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
-db = SQL("sqlite:///databaseplus.db") # Using heated steam db
+# Using heated steam db
+db = SQL("sqlite:///databaseplus.db") 
 
-# Global
+# Global variables
 list_of_dictionaries = db.execute("SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureV UNION SELECT pressure_bar, temperature_c, volume_m3_kg FROM PressureL")
 # Convert the list of dictionaries to a list of tuples (Tsat, Pressure)
 data_tuples = [(item['pressure_bar'], item['temperature_c'], item['volume_m3_kg']) for item in list_of_dictionaries]
@@ -32,6 +33,7 @@ data_array = np.array(data_tuples_filtered)
 P_data = data_array[:, 0]
 Tsat_data = data_array[:, 1]
 
+# To convert to a numpy array later
 tempdict = db.execute("SELECT temperature_c FROM PressureL")
 tuplesz = []
 for i in tempdict:
@@ -40,6 +42,7 @@ for i in tempdict:
 
 @app.route('/')
 def home():
+    # Homepage
     return render_template("home.html")
 
 
@@ -63,10 +66,13 @@ def properties():
                            super_data=super_data,
                            critical_data=critical_data)
 
+
 @app.route("/pressure", methods=["GET", "POST"])
 def pressure():
     if request.method == "POST":
+        # Get user input
         temperature = request.form.get("temperature")
+        # Check if input is a positive number
         try:
             T = float(temperature)
         except ValueError:
@@ -75,10 +81,12 @@ def pressure():
         if T <= 0:
             return apology("Temperature must be a positive number")
 
+        # Call upon calculations functions
         pressure = interpolate_press(T, Tsat_data, P_data)
-        buck_pressure = Buck(T)
-        affandi_press = Affandi_pressure(T)
+        Buck_pressure = Buck(T)
+        Affandi_press = Affandi_pressure(T)
 
+        # Create an error graph
         temps = np.array(tuplesz)
         err1 = np.zeros_like(temps)
         err2 = np.zeros_like(temps)
@@ -89,27 +97,26 @@ def pressure():
         plt.xlabel('Temperature [Celsius]')
         plt.ylabel('Error [%]')
         plt.gca().legend(('Arden Buck Method','Affandi et al. Method'))
-        plt.savefig('static/error_graph_p.png')  # Save in the 'static' folder
-        plt.close()  # Clear the figure
+        # Save in the 'static' folder
+        plt.savefig('static/error_graph_p.png')  
+        plt.close()
 
-        return render_template("pressresult.html", pressure=pressure, buck_pressure=buck_pressure, affandi_press=affandi_press)
-        #temps = np.array([81.3,99.6,179.9,212.4,250.3,311,342.1,357,365.7,373.7])
-        
+        return render_template("pressresult.html", pressure=pressure, Buck_pressure=Buck_pressure, Affandi_press=Affandi_press)
     else:
         return render_template("pressure.html")
-
 
 
 @app.route("/specific", methods=["GET", "POST"])
 def specific():
     if request.method == "POST":
-        #Remember to validate users input, don't convert to float straight away
+        # Get user input
         temperature = request.form.get("temperature")
 
-        # Check if user provides one input
+        # Check if user provides an input
         if not temperature:
             return apology("Enter a Temperature")
 
+        # Check if input is a positive number
         try:
             temperature = float(temperature)
         except ValueError:
@@ -118,33 +125,36 @@ def specific():
         if temperature <= 0:
             return apology("Temperature must be a positive number")
 
+        # Create a specific volume numpy array
         vg_dict = db.execute("SELECT volume_m3_kg FROM PressureV")
         hmm = []
         for j in vg_dict:
             hmm.append(j["volume_m3_kg"])
-        vg_array = np.array(hmm)
-        
-        vg_data = vg_array
+        vg_data = np.array(hmm)
 
+        # Call upon calculation functions, pass in user input and numpy arrays
+        # Steam table method
         vg_table = np.interp(temperature,Tsat_data,vg_data)
+        # Ideal gas method
         v_g = get_vg_temperature(temperature, P_data, Tsat_data)
+        # Affandi method
         affandi_v_g = get_vg_Affandi(temperature)
 
+        # Create an error graph
         temps = np.array(tuplesz)
         err1 = np.zeros_like(temps)
         err2 = np.zeros_like(temps)
         for i in np.arange(0,len(temps),1):
             err1[i], err2[i] = calc_error(temps[i], Tsat_data, vg_data, P_data)
-        
         plt.plot(temps,abs(err1),'ob-',temps,abs(err2),'^r-')
         plt.xlabel('Temperature [Celsius]')
         plt.ylabel('Error [%]')
         plt.gca().legend(('Ideal Gas Method','Affandi et al. Method'))
         # Save the graph as an image
-        plt.savefig('static/error_graph.png')  # Save in the 'static' folder
-        plt.close()  # Clear the figure
-        return render_template("result.html",vg_table=vg_table, v = v_g, affandi_v_g = affandi_v_g)
-                 
+        # Save in the 'static' folder
+        plt.savefig('static/error_graph.png')  
+        plt.close()
+        return render_template("result.html",vg_table=vg_table, v = v_g, affandi_v_g = affandi_v_g) 
     else:
         return render_template("specific.html")
 
@@ -173,15 +183,14 @@ def heated():
         # Get the temperature of the immediate and previous of the users input
         # Get the volume of the corresponding immediate temp and the previous temp
         # Perform interpolation
-        # Unacceptable temps, already in table, no need for interpolation
-        #unacceptable = [50, 100, 150, 200, 250, 300, 350, 375, 400, 425, 450, 500, 550, 600, 700, 800]
-
-
+        # Temps, already in table, no need for interpolation, simply output the value
+        # existing_temps = [50, 100, 150, 200, 250, 300, 350, 375, 400, 425, 450, 500, 550, 600, 700, 800]
 
         super_heated_data = db.execute("SELECT p, sat_T_c, v, u, h, s FROM super_heated_steam")
         critical_heated_data = db.execute("SELECT p, sat_T_c, v, h, s FROM critical_heated_steam")
         combined = super_heated_data + critical_heated_data
-        # Check if pressure input is in the table
+
+        # Check if pressure input is in the table, if it is not, output error
         pressure_values = []
         for row in combined:
             pressure_values.append(row["p"])
@@ -189,6 +198,7 @@ def heated():
         if pressure not in pressure_values:
             return apology("Need to interpolate Pressure or it does not exist in the table")
 
+        # Specific volume interpolater
         if selection == "specific_volume":
             # Check if temperature and associated data exits in table, if so, output them
             vol = None
@@ -222,6 +232,7 @@ def heated():
                 return render_template("resultstwosc.html", next_tempsc=next_tempsc, prev_tempsc=prev_tempsc, next_vsc=next_vsc, prev_vsc=prev_vsc, v_interpsc=v_interpsc)
             else:
                 return apology("The data entered are not in the super heated steam or critical heated region")
+        # Internal energy interpolater
         elif selection == "internal_energy":
             # u does not exist in critical region table so avoid it
             u = None
@@ -247,6 +258,7 @@ def heated():
                 return apology("There is no u in the from 80 bar in the super heated region and in critical heated region")
             else:
                 return apology("The data entered are not in the super heated steam or critical heated region")
+        # Specific enthalpy interpolater
         elif selection == "specific_enthalpy":
             h = None
             # Check if interpolation is necessary
@@ -277,7 +289,8 @@ def heated():
                 next_hsc = immediate_hsc[0]["h"]
                 prev_hsc = previous_hsc[0]["h"]
                 h_interpsc = ((temperature - prev_tempsc) / (next_tempsc - prev_tempsc)) * (next_hsc - prev_hsc) + prev_hsc
-                return render_template("hresultstwosc.html", next_tempsc=next_tempsc, prev_tempsc=prev_tempsc, next_hsc=next_hsc, prev_hsc=prev_hsc, h_interpsc=h_interpsc)   
+                return render_template("hresultstwosc.html", next_tempsc=next_tempsc, prev_tempsc=prev_tempsc, next_hsc=next_hsc, prev_hsc=prev_hsc, h_interpsc=h_interpsc)
+        # Specific entropy interpolater  
         elif selection == "specific_entropy":
             s = None
             # Check if interpolation is necessary
@@ -315,17 +328,18 @@ def heated():
         return render_template("heated.html")
 
 
-
-
 @app.route("/adibatic", methods=["GET", "POST"])
 def adibatic():
     if request.method == "POST":
+        # Get user input
         pressure = request.form.get("pressure")
         temperature = request.form.get("temperature")
         
+        # Make sure both fields are not empty
         if not pressure or not temperature:
             return apology("Enter values for both temperature and pressure")
         
+        # Make sure positive numbers are entered
         try:
             pressure = float(pressure)
             temperature = float(temperature)
@@ -357,10 +371,9 @@ def adibatic():
             h_g = row["enthalpy_kJ_kg"]
         h_fg = h_g - h_f
         
+        # Call upon final specific enthalpy calculater function
         h2 = get_h2(pressurecalc, s_g, s_f, s_fg, h_f, h_g, h_fg)
 
         return render_template("adibaticres.html" , h2=h2)
-        
-    
     else:
         return render_template("adibatic.html")

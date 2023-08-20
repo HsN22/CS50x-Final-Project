@@ -14,7 +14,6 @@ def apology(message, code=400):
   #  return T_C
 
 def interpolate_press(T,Tsat_data, P_data):
-
     P_bar = np.interp(T,Tsat_data, P_data)
 
     return P_bar
@@ -43,6 +42,7 @@ def Affandi_pressure(T):
     return P_bar
 
 def calc_error_pressure(T, Tsat_data, P_data):
+    # Error calculator
     P_bar = np.interp(T,Tsat_data, P_data)
     
     # Now get the data using the Arden Buck method
@@ -73,7 +73,6 @@ def get_vg_temperature(T, P_data, Tsat_data):
     return vg
 
 def get_vg_Affandi(T):
-    
     a = -7.75883
     b = 3.23753
     c = 2.05755

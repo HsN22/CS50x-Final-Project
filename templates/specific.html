@@ -5,12 +5,20 @@
 {% endblock %}
 
 {% block main %}
-    <p>Calculate the specific volume of saturated vapor using the ideal gas equation and Affandi equation</p>
+    <script type="text/javascript" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <p>Calculate the specific volume of saturated vapor using steam tables, the Ideal Gas equation and the Affandi et al. method (2013).</p>
     <form action = "/specific" method = "post">
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="temperature" name="temperature" placeholder="Temperature" type="text">
         </div>
         <button class="btn btn-primary" type="submit">Calculate</button>
     </form>
-    {{ vg_data }}
+    
+    <p>Ideal gas equation: \( v_g = \frac{\large{R \cdot T}}{\large{P}} \)</p>
+    
+
+    <p>Affandi et al. method (2013): \( \log(v_{g}) = a + b \cdot \log\left(\dfrac{1}{Tr}\right)^{\!0.4} + \dfrac{c}{Tr^2} + \dfrac{d}{Tr^4} + \dfrac{e}{Tr^5} \)</p>
+
+
 {% endblock %}

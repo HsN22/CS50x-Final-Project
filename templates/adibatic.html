@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block main %}
+    <script type="text/javascript" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <p>Calculate for an adibatic system, the final enthalpy, given pressure in bar and final temperature in celcius</p>
     <form action = "/adibatic" method = "post">
 
@@ -18,4 +19,21 @@
         <button class="btn btn-primary" type="submit">Calculate</button>
     </form>
 
+    <p>For an Adibatic system, the Entropy is constant throught the process. This means it will be the same at the starting pressure and the final
+       temperature, if you are given them.
+    </p>
+    <p>Steps:</p>
+    <p>1. Calculate the Dryness Fraction, \( x_{1} \), at \( h_1 \)</p>
+    <p>2. Since process is Adibatic, \( x_{1} \) is the same as \( x_{2} \)</p>
+    <p>3. Desired property, i.e Enthalpy, \( h \), can be calculated</p>
+    
+    <div>
+        Specific Entropy:
+        \[ s_1 = s_f + x_1 s_{fg} \]
+    </div>
+    <div>
+        \[ x_1 = x_2 \]
+        Specific Enthalpy:
+        \[ h_2 = h_f + x_2 s_{fg} \]
+    </div>
 {% endblock %}

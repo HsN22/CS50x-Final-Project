@@ -7,9 +7,15 @@
 {% block main %}
     <p> This website can be used to perform calculations to find various thermodynamic properties. </p>
 
-    <p> Calculations on the Saturated tables that can be performed are, finding Saturated Pressure, Specific Volume of Vapor and a constant Entropy problem.</p>
+    <p> 
+        Calculations on the Saturated tables that can be performed are, finding Saturated Pressure, Specific Volume of Vapor and a constant Entropy problem.
+        The equations used to calculate Specific Volume are the Ideal Gas and <a href="https://doi.org/10.1016/j.proeng.2013.02.095" target="_blank">Affandi et al. (2013) method</a>. An error graph is displayed to show the uncertainties
+        comparing the results to the more accurate method, using the tables.
+        The equations used to calculate Saturated Pressure are the <a href="https://www.hygrometers.com/wp-content/uploads/CR-1A-users-manual-2009-12.pdf" target="_blank">Arden Buck equation (1996)</a> and <a href="https://doi.org/10.1016/j.proeng.2013.02.095" target="_blank">Affandi et al. (2013) method</a>. An error graph is also shown.
+    </p>
 
-    <p> Calculations that can be performed on the Superheated and Supercritical tables are linearly interpolating Temperature,
+    <p> 
+        Calculations that can be performed on the Superheated and Supercritical tables are linearly interpolating Temperature,
         Specific Volume, Internal Energy, Specific Enthalpy and Specific Entropy, as not all values of a property for a given Temperature
         can be found manually by looking at the tables itself.
     </p>

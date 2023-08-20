@@ -7,9 +7,9 @@
 {% block main %}
     <!--Is hardcoding the options good practice or use for loop, array like in Froshims example?-->
     <form action="/heated" method="POST">
-        <label for="calcType">Select what to calculate:</label>
+        <label for="calcType">Calculate:</label>
         <select id="calcType" name="calcType">
-            <option disabled selected>Select an option</option>
+            <option enabled selected>Property</option>
             <option value="specific_volume">Specific Volume</option>
             <!--More properties later-->
             <option value="internal_energy">Internal Energy</option>

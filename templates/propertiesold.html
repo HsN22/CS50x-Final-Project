@@ -117,6 +117,54 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <h1 class="text-center">Superheated Steam Data</h1>
+        <table class="table mx-auto">
+            <thead>
+                <tr>
+                    <th>Pressure (p)</th>
+                    <th>Saturation Temperature (°C)</th>
+                    <th>Volume (v)</th>
+                    <th>Internal Energy (u)</th>
+                    <th>Enthalpy (h)</th>
+                    <th>Entropy (s)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in super_data %}
+                <tr>
+                    <td>{{ data.p }}</td>
+                    <td>{{ data.sat_T_c }}</td>
+                    <td>{{ data.v }}</td>
+                    <td>{{ data.u }}</td>
+                    <td>{{ data.h }}</td>
+                    <td>{{ data.s }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h1 class="text-center">Supercritical Steam Data</h1>
+        <table class="table mx-auto">
+            <thead>
+                <tr>
+                    <th>Pressure (p)</th>
+                    <th>Saturation Temperature (°C)</th>
+                    <th>Volume (v)</th>
+                    <th>Enthalpy (h)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in critical_data %}
+                <tr>
+                    <td>{{ data.p }}</td>
+                    <td>{{ data.sat_T_c }}</td>
+                    <td>{{ data.v }}</td>
+                    <td>{{ data.h }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
 {% endblock %}

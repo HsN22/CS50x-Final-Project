@@ -39,6 +39,11 @@ for i in tempdict:
 
 
 @app.route('/')
+def home():
+    return render_template("home.html")
+
+
+@app.route('/properties')
 def properties():
     # Data from NIST website
     pressure_l_data = db.execute("SELECT * FROM PressureL")
@@ -47,12 +52,16 @@ def properties():
     temperature_v_data = db.execute("SELECT * FROM TemperatureV")
 
     # Data from R&M tables
+    super_data = db.execute("SELECT * FROM super_heated_steam")
+    critical_data = db.execute("SELECT * FROM critical_heated_steam")
 
     return render_template('properties.html',
                            pressure_l_data=pressure_l_data,
                            pressure_v_data=pressure_v_data,
                            temperature_l_data=temperature_l_data,
-                           temperature_v_data=temperature_v_data)
+                           temperature_v_data=temperature_v_data,
+                           super_data=super_data,
+                           critical_data=critical_data)
 
 @app.route("/pressure", methods=["GET", "POST"])
 def pressure():

@@ -9,16 +9,39 @@
         <label for="tableSelector">Select a Table:</label>
         <select id="tableSelector" onchange="showTable()">
             <option value="">Select a Table</option>
-            <option value="pressureL">PressureL Data</option>
-            <option value="pressureV">PressureV Data</option>
-            <option value="temperatureL">TemperatureL Data</option>
-            <option value="temperatureV">TemperatureV Data</option>
+            <option value="pressureL">Pressure Liquid Data</option>
+            <option value="pressureV">Pressure Vapor Data</option>
+            <option value="temperatureL">Temperature Liquid Data</option>
+            <option value="temperatureV">Temperature Vapor Data</option>
+            <option value="superheatedSteam">Superheated Steam Data</option>
+            <option value="supercriticalSteam">Supercritical Steam Data</option>
         </select>
 
         <div id="tableContainer">
             <!-- This is where the selected table will be displayed -->
         </div>
     </div>
+
+    <style>
+        #tableContainer {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: auto;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 
     <script>
         function showTable() {
@@ -28,126 +51,93 @@
 
             // Define the table content based on the selected value
             const tableContent = {
-                pressureL: `
-                    <h1 class="text-center">PressureL Data</h1>
-                    <table class="table mx-auto">
-                        <thead>
-                            <tr>
-                                <th>Pressure (bar)</th>
-                                <th>Temperature (C)</th>
-                                <th>Volume (m3/kg)</th>
-                                <th>Internal Energy (kJ/kg)</th>
-                                <th>Enthalpy (kJ/kg)</th>
-                                <th>Entropy (J/g*K)</th>
-                                <th>Phase</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for data in pressure_l_data %}
-                            <tr>
-                                <td>{{ data.pressure_bar }}</td>
-                                <td>{{ data.temperature_c }}</td>
-                                <td>{{ data.volume_m3_kg }}</td>
-                                <td>{{ data.u_kJ_kg }}</td>
-                                <td>{{ data.enthalpy_kJ_kg }}</td>
-                                <td>{{ data.entropy_J_gK }}</td>
-                                <td>{{ data.phase }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                `,
-                pressureV: `
-                    <h1 class="text-center">PressureV Data</h1>
-                    <table class="table mx-auto">
-                        <thead>
-                            <tr>
-                                <th>Pressure (bar)</th>
-                                <th>Temperature (C)</th>
-                                <th>Volume (m3/kg)</th>
-                                <th>Internal Energy (kJ/kg)</th>
-                                <th>Enthalpy (kJ/kg)</th>
-                                <th>Entropy (J/g*K)</th>
-                                <th>Phase</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for data in pressure_v_data %}
-                            <tr>
-                                <td>{{ data.pressure_bar }}</td>
-                                <td>{{ data.temperature_c }}</td>
-                                <td>{{ data.volume_m3_kg }}</td>
-                                <td>{{ data.u_kJ_kg }}</td>
-                                <td>{{ data.enthalpy_kJ_kg }}</td>
-                                <td>{{ data.entropy_J_gK }}</td>
-                                <td>{{ data.phase }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                `,
-                temperatureL: `
-                    <h1 class="text-center">TemperatureL Data</h1>
-                    <table class="table mx-auto">
-                        <thead>
-                            <tr>
-                                <th>Temperature (C)</th>
-                                <th>Pressure (bar)</th>
-                                <th>Volume (m3/kg)</th>
-                                <th>Internal Energy (kJ/kg)</th>
-                                <th>Enthalpy (kJ/kg)</th>
-                                <th>Entropy (J/g*K)</th>
-                                <th>Phase</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for data in temperature_l_data %}
-                            <tr>
-                                <td>{{ data.temperature_c }}</td>
-                                <td>{{ data.pressure_bar }}</td>
-                                <td>{{ data.volume_m3_kg }}</td>
-                                <td>{{ data.u_kJ_kg }}</td>
-                                <td>{{ data.enthalpy_kJ_kg }}</td>
-                                <td>{{ data.entropy_J_gK }}</td>
-                                <td>{{ data.phase }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                `,
-                temperatureV: `
-                    <h1 class="text-center">TemperatureV Data</h1>
-                    <table class="table mx-auto">
-                        <thead>
-                            <tr>
-                                <th>Temperature (C)</th>
-                                <th>Pressure (bar)</th>
-                                <th>Volume (m3/kg)</th>
-                                <th>Internal Energy (kJ/kg)</th>
-                                <th>Enthalpy (kJ/kg)</th>
-                                <th>Entropy (J/g*K)</th>
-                                <th>Phase</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for data in temperature_v_data %}
-                            <tr>
-                                <td>{{ data.temperature_c }}</td>
-                                <td>{{ data.pressure_bar }}</td>
-                                <td>{{ data.volume_m3_kg }}</td>
-                                <td>{{ data.u_kJ_kg }}</td>
-                                <td>{{ data.enthalpy_kJ_kg }}</td>
-                                <td>{{ data.entropy_J_gK }}</td>
-                                <td>{{ data.phase }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                `,
+                pressureL: `{% for data in pressure_l_data %}
+                    <tr>
+                        <td>{{ data.pressure_bar }}</td>
+                        <td>{{ data.temperature_c }}</td>
+                        <td>{{ data.volume_m3_kg }}</td>
+                        <td>{{ data.u_kJ_kg }}</td>
+                        <td>{{ data.enthalpy_kJ_kg }}</td>
+                        <td>{{ data.entropy_J_gK }}</td>
+                        <td>{{ data.phase }}</td>
+                    </tr>
+                {% endfor %}`,
+                pressureV: `{% for data in pressure_v_data %}
+                    <tr>
+                        <td>{{ data.pressure_bar }}</td>
+                        <td>{{ data.temperature_c }}</td>
+                        <td>{{ data.volume_m3_kg }}</td>
+                        <td>{{ data.u_kJ_kg }}</td>
+                        <td>{{ data.enthalpy_kJ_kg }}</td>
+                        <td>{{ data.entropy_J_gK }}</td>
+                        <td>{{ data.phase }}</td>
+                    </tr>
+                {% endfor %}`,
+                temperatureL: `{% for data in temperature_l_data %}
+                    <tr>
+                        <td>{{ data.temperature_c }}</td>
+                        <td>{{ data.pressure_bar }}</td>
+                        <td>{{ data.volume_m3_kg }}</td>
+                        <td>{{ data.u_kJ_kg }}</td>
+                        <td>{{ data.enthalpy_kJ_kg }}</td>
+                        <td>{{ data.entropy_J_gK }}</td>
+                        <td>{{ data.phase }}</td>
+                    </tr>
+                {% endfor %}`,
+                temperatureV: `{% for data in temperature_v_data %}
+                    <tr>
+                        <td>{{ data.temperature_c }}</td>
+                        <td>{{ data.pressure_bar }}</td>
+                        <td>{{ data.volume_m3_kg }}</td>
+                        <td>{{ data.u_kJ_kg }}</td>
+                        <td>{{ data.enthalpy_kJ_kg }}</td>
+                        <td>{{ data.entropy_J_gK }}</td>
+                        <td>{{ data.phase }}</td>
+                    </tr>
+                {% endfor %}`,
+                superheatedSteam: `{% for data in super_data %}
+                    <tr>
+                        <td>{{ data.p }}</td>
+                        <td>{{ data.sat_T_c }}</td>
+                        <td>{{ data.v }}</td>
+                        <td>{{ data.u }}</td>
+                        <td>{{ data.h }}</td>
+                        <td>{{ data.s }}</td>
+                    </tr>
+                {% endfor %}`,
+                supercriticalSteam: `{% for data in critical_data %}
+                    <tr>
+                        <td>{{ data.p }}</td>
+                        <td>{{ data.sat_T_c }}</td>
+                        <td>{{ data.v }}</td>
+                        <td>{{ data.h }}</td>
+                    </tr>
+                {% endfor %}`
             };
 
             // Set the selected table's content in the tableContainer
-            tableContainer.innerHTML = tableContent[selectedValue] || "";
+            tableContainer.innerHTML = selectedValue ? `
+                <table>
+                    <thead>
+                        <tr>
+                            ${getTableHeader(selectedValue)}
+                        </tr>
+                    </thead>
+                    <tbody>${tableContent[selectedValue]}</tbody>
+                </table>` : "";
+        }
+
+        function getTableHeader(selectedValue) {
+            const headerColumns = {
+                pressureL: "<th>Pressure (bar)</th><th>Temperature (C)</th><th>Volume (m3/kg)</th><th>Internal Energy (kJ/kg)</th><th>Enthalpy (kJ/kg)</th><th>Entropy (J/g*K)</th><th>Phase</th>",
+                pressureV: "<th>Pressure (bar)</th><th>Temperature (C)</th><th>Volume (m3/kg)</th><th>Internal Energy (kJ/kg)</th><th>Enthalpy (kJ/kg)</th><th>Entropy (J/g*K)</th><th>Phase</th>",
+                temperatureL: "<th>Temperature (C)</th><th>Pressure (bar)</th><th>Volume (m3/kg)</th><th>Internal Energy (kJ/kg)</th><th>Enthalpy (kJ/kg)</th><th>Entropy (J/g*K)</th><th>Phase</th>",
+                temperatureV: "<th>Temperature (C)</th><th>Pressure (bar)</th><th>Volume (m3/kg)</th><th>Internal Energy (kJ/kg)</th><th>Enthalpy (kJ/kg)</th><th>Entropy (J/g*K)</th><th>Phase</th>",
+                superheatedSteam: "<th>Pressure (p)</th><th>Saturation Temperature (°C)</th><th>Volume (v)</th><th>Internal Energy (u)</th><th>Enthalpy (h)</th><th>Entropy (s)</th>",
+                supercriticalSteam: "<th>Pressure (p)</th><th>Saturation Temperature (°C)</th><th>Volume (v)</th><th>Enthalpy (h)</th>"
+            };
+
+            return headerColumns[selectedValue] || "";
         }
     </script>
 {% endblock %}

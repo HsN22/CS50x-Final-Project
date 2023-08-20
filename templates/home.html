@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block main %}
+    <p> This website can be used to perform calculations to find various thermodynamic properties. </p>
+
+    <p> Calculations on the Saturated tables that can be performed are, finding Saturated Pressure, Specific Volume of Vapor and a constant Entropy problem</p>
+
+    <p> Thermodynamic properties come from two sources: NIST website for saturated steam properties and Roger & Mayhew tables for Superheated and Supercritical data. 
+        Saturated pressure and temperature are from NIST due to ease of digital access,
+        while R&M would be ideal, as both sources are nearly identical for saturated data. </p>
+
+
+{% endblock %}

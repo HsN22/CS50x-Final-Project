@@ -7,7 +7,7 @@
 {% block main %}
     <script type="text/javascript" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-    <p>Calculate the Saturated Pressure using tables, the Arden Buck method and the Affandi et al. method</p>
+    <p>Calculate the Saturated Pressure using tables, the <a href="https://www.hygrometers.com/wp-content/uploads/CR-1A-users-manual-2009-12.pdf" target="_blank">Arden Buck equation (1996)</a> and the <a href="https://doi.org/10.1016/j.proeng.2013.02.095" target="_blank">Affandi et al. (2013) method</a>.</p>
     <form action = "/pressure" method = "post">
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="temperature" name="temperature" placeholder="Temperature" type="text">
@@ -15,10 +15,10 @@
         <button class="btn btn-primary" type="submit">Calculate</button>
     </form>
 
-    <p>Arden Buck equation (1996): \( P = 0.61121 \cdot e^{\LARGE{\left( \frac{18.678 - \frac{T}{234.5} }{ T/(257.14+T) } \right)}} \)</p>
+    <p><a href="https://www.hygrometers.com/wp-content/uploads/CR-1A-users-manual-2009-12.pdf" target="_blank">Arden Buck equation (1996)</a>: \( P = 0.61121 \cdot e^{\LARGE{\left( \frac{18.678 - \frac{T}{234.5} }{ T/(257.14+T) } \right)}} \)</p>
     
 
-    <p>Affandi et al. method: \( \log(P) = a + b \cdot \log(Tr) + c \cdot (\log(Tr))^2 + d \cdot (\log(Tr))^4 + e \cdot (Tr)^5 \)</p>
+    <p><a href="https://doi.org/10.1016/j.proeng.2013.02.095" target="_blank">Affandi et al. (2013) method</a>: \( \log(P) = a + b \cdot \log(Tr) + c \cdot (\log(Tr))^2 + d \cdot (\log(Tr))^4 + e \cdot (Tr)^5 \)</p>
     
 
 <!--Buck (1996), Buck Research CR-1A User's Manual, Appendix 1.-->

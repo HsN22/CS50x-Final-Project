@@ -5,6 +5,17 @@
 {% endblock %}
 
 {% block main %}
+    <p>
+       Calculate a thermodynamic property that is found in the Superheated and Supercritical tables for a given Pressure and Temperature.
+       If the Temperature and the thermodynamic property is not found within the tables but lies in a valid Temperature and Pressure range,
+       i.e the Temperature range seen in the tables, linear interpolation is used to calculate the thermodynamic property.
+    </p>
+    <p>
+       Note that only Pressure values seen in the Superheated and Supercritical tables will work.
+       A Pressure interpolater is needed if the Pressure value is within the range as seen in the tables but not exactly the ones on there. 
+    </p>
+
+
     <!--Is hardcoding the options good practice or use for loop, array like in Froshims example?-->
     <form action="/heated" method="POST">
         <label for="calcType">Calculate:</label>

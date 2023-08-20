@@ -5,12 +5,13 @@
 {% endblock %}
 
 {% block main %}
+    <div>
+        <p>The pressure using tables is {{ pressure }} bar</p>
+        <p>The pressure using the Arden Buck equation is {{ buck_pressure }} bar</p>
+        <p>The pressure using the Affandi equation is {{ affandi_press }} bar</p>
+    </div>
 
-    <p>The pressure using tables is {{ pressure }} bar</p>
-    <p>The pressure using the Arden Buck equation is {{ buck_pressure }} bar</p>
-    <p>The pressure using the Affandi equation is {{ affandi_press }} bar</p>
-
-    <h2>Error Graph</h2>
+    <h2 style="margin-top: 40px;">Error Graph</h2>
     <img src="{{ url_for('static', filename='error_graph_p.png') }}" alt="Error Graph">
 
 {% endblock %}

@@ -158,6 +158,18 @@ def specific():
     else:
         return render_template("specific.html")
 
+def get_immediate_and_previous_temps(table_name, pressure, temperature):
+    immediate_temp = db.execute(
+        "SELECT sat_T_c FROM ? WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1",
+        table_name, pressure, temperature
+    )
+    previous_temp = db.execute(
+        "SELECT sat_T_c FROM ? WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1",
+        table_name, pressure, temperature
+    )
+    next_temp = immediate_temp[0]["sat_T_c"]
+    prev_temp = previous_temp[0]["sat_T_c"]
+    return next_temp, prev_temp
 
 @app.route("/heated", methods=["GET", "POST"])
 def heated():
@@ -209,10 +221,11 @@ def heated():
             if vol is not None:
                 return render_template("resultstwoexisting.html", v_exists=vol)
             if (pressure >= 0 and pressure <= 4 and temperature >= 50 and temperature not in unacceptable) or (pressure >= 5 and pressure <= 221.2 and temperature >= 200):
-                immediate_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
-                previous_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
-                next_temp = immediate_temp[0]["sat_T_c"]
-                prev_temp = previous_temp[0]["sat_T_c"]
+                next_temp, prev_temp = get_immediate_and_previous_temps("super_heated_steam", pressure, temperature)
+                #immediate_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
+                #previous_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
+                #next_temp = immediate_temp[0]["sat_T_c"]
+                #prev_temp = previous_temp[0]["sat_T_c"]
                 immediate_v = db.execute("SELECT v FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", next_temp, pressure)
                 previous_v = db.execute("SELECT v FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", prev_temp, pressure)
                 next_v = immediate_v[0]["v"]
@@ -220,10 +233,11 @@ def heated():
                 v_interp = ((temperature - prev_temp) / (next_temp - prev_temp)) * (next_v - prev_v) + prev_v
                 return render_template("resultstwo.html", next_temp=next_temp, prev_temp=prev_temp, next_v=next_v, prev_v=prev_v, v_interp=v_interp)
             elif (pressure >= 225 and pressure <= 1000 and temperature >= 350):
-                immediate_tempsc = db.execute("SELECT sat_T_c FROM critical_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
-                previous_tempsc = db.execute("SELECT sat_T_c FROM critical_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
-                next_tempsc = immediate_tempsc[0]["sat_T_c"]
-                prev_tempsc = previous_tempsc[0]["sat_T_c"]
+                next_tempsc, prev_tempsc = get_immediate_and_previous_temps("critical_heated_steam", pressure, temperature)
+                #immediate_tempsc = db.execute("SELECT sat_T_c FROM critical_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
+                #previous_tempsc = db.execute("SELECT sat_T_c FROM critical_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
+                #next_tempsc = immediate_tempsc[0]["sat_T_c"]
+                #prev_tempsc = previous_tempsc[0]["sat_T_c"]
                 immediate_vsc = db.execute("SELECT v FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", next_tempsc, pressure)
                 previous_vsc = db.execute("SELECT v FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", prev_tempsc, pressure)
                 next_vsc = immediate_vsc[0]["v"]
@@ -244,10 +258,11 @@ def heated():
             if u is not None:
                 return render_template("uresultexist.html", u_exists=u)
             if (pressure >= 0 and pressure <= 4 and temperature >= 50) or (pressure >= 5 and pressure <= 70 and temperature >= 200):
-                immediate_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
-                previous_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
-                next_temp = immediate_temp[0]["sat_T_c"]
-                prev_temp = previous_temp[0]["sat_T_c"]
+                next_temp, prev_temp = get_immediate_and_previous_temps("super_heated_steam", pressure, temperature)
+                #immediate_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
+                #previous_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
+                #next_temp = immediate_temp[0]["sat_T_c"]
+                #prev_temp = previous_temp[0]["sat_T_c"]
                 immediate_u = db.execute("SELECT u FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", next_temp, pressure)
                 previous_u = db.execute("SELECT u FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", prev_temp, pressure)
                 next_u = immediate_u[0]["u"]
@@ -269,10 +284,11 @@ def heated():
             if h is not None:
                 return render_template("hresultexist.html", h_exists=h)
             if (pressure >= 0 and pressure <= 4 and temperature >= 50) or (pressure >= 5 and pressure <= 221.2 and temperature >= 200):
-                immediate_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
-                previous_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
-                next_temp = immediate_temp[0]["sat_T_c"]
-                prev_temp = previous_temp[0]["sat_T_c"]
+                next_temp, prev_temp = get_immediate_and_previous_temps("super_heated_steam", pressure, temperature)
+                #immediate_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
+                #previous_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
+                #next_temp = immediate_temp[0]["sat_T_c"]
+                #prev_temp = previous_temp[0]["sat_T_c"]
                 immediate_h = db.execute("SELECT h FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", next_temp, pressure)
                 previous_h = db.execute("SELECT h FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", prev_temp, pressure)
                 next_h = immediate_h[0]["h"]
@@ -280,10 +296,11 @@ def heated():
                 h_interp = ((temperature - prev_temp) / (next_temp - prev_temp)) * (next_h - prev_h) + prev_h
                 return render_template("hresultstwo.html", next_temp=next_temp, prev_temp=prev_temp, next_h=next_h, prev_h=prev_h, h_interp=h_interp)
             elif (pressure >= 225 and pressure <= 1000 and temperature >= 350):
-                immediate_tempsc = db.execute("SELECT sat_T_c FROM critical_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
-                previous_tempsc = db.execute("SELECT sat_T_c FROM critical_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
-                next_tempsc = immediate_tempsc[0]["sat_T_c"]
-                prev_tempsc = previous_tempsc[0]["sat_T_c"]
+                next_tempsc, prev_tempsc = get_immediate_and_previous_temps("critical_heated_steam", pressure, temperature)
+                #immediate_tempsc = db.execute("SELECT sat_T_c FROM critical_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
+                #previous_tempsc = db.execute("SELECT sat_T_c FROM critical_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
+                #next_tempsc = immediate_tempsc[0]["sat_T_c"]
+                #prev_tempsc = previous_tempsc[0]["sat_T_c"]
                 immediate_hsc = db.execute("SELECT h FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", next_tempsc, pressure)
                 previous_hsc = db.execute("SELECT h FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", prev_tempsc, pressure)
                 next_hsc = immediate_hsc[0]["h"]
@@ -301,10 +318,11 @@ def heated():
             if s is not None:
                 return render_template("sresultexist.html", s_exists=s)
             if (pressure >= 0 and pressure <= 4 and temperature >= 50) or (pressure >= 5 and pressure <= 221.2 and temperature >= 200):
-                immediate_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
-                previous_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
-                next_temp = immediate_temp[0]["sat_T_c"]
-                prev_temp = previous_temp[0]["sat_T_c"]
+                next_temp, prev_temp = get_immediate_and_previous_temps("super_heated_steam", pressure, temperature)
+                #immediate_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
+                #previous_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
+                #next_temp = immediate_temp[0]["sat_T_c"]
+                #prev_temp = previous_temp[0]["sat_T_c"]
                 immediate_s = db.execute("SELECT s FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", next_temp, pressure)
                 previous_s = db.execute("SELECT s FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", prev_temp, pressure)
                 next_s = immediate_s[0]["s"]
@@ -312,10 +330,11 @@ def heated():
                 s_interp = ((temperature - prev_temp) / (next_temp - prev_temp)) * (next_s - prev_s) + prev_s
                 return render_template("hresultstwo.html", next_temp=next_temp, prev_temp=prev_temp, next_s=next_s, prev_s=prev_s, s_interp=s_interp)
             elif (pressure >= 225 and pressure <= 1000 and temperature >= 350):
-                immediate_tempsc = db.execute("SELECT sat_T_c FROM critical_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
-                previous_tempsc = db.execute("SELECT sat_T_c FROM critical_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
-                next_tempsc = immediate_tempsc[0]["sat_T_c"]
-                prev_tempsc = previous_tempsc[0]["sat_T_c"]
+                next_tempsc, prev_tempsc = get_immediate_and_previous_temps("critical_heated_steam", pressure, temperature)
+                #immediate_tempsc = db.execute("SELECT sat_T_c FROM critical_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
+                #previous_tempsc = db.execute("SELECT sat_T_c FROM critical_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
+                #next_tempsc = immediate_tempsc[0]["sat_T_c"]
+                #prev_tempsc = previous_tempsc[0]["sat_T_c"]
                 immediate_ssc = db.execute("SELECT s FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", next_tempsc, pressure)
                 previous_ssc = db.execute("SELECT s FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", prev_tempsc, pressure)
                 next_ssc = immediate_ssc[0]["s"]
@@ -327,6 +346,17 @@ def heated():
     else:
         return render_template("heated.html")
 
+@app.route("/heatedtwo", methods=["GET", "POST"])
+def heatedtwo():
+    if request.method == "POST":
+        # Get user input of pressure and temperature
+        # Validate input
+        # Find for a given temperature the immediate pressure and the previous pressure
+        # Find for a given temperature AND those pressures selected, the thermodynamic properties
+        # Perform linear interpolation
+        return apology("TODO")
+    else:
+        return render_template("heatedtwo.html")
 
 @app.route("/adibatic", methods=["GET", "POST"])
 def adibatic():

@@ -346,6 +346,21 @@ def heated():
     else:
         return render_template("heated.html")
 
+'''
+def get_immediate_and_previous_press(table_name, pressure, temperature):
+    immediate_temp = db.execute(
+        #"SELECT sat_T_c FROM ? WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1",
+        table_name, pressure, temperature
+    )
+    previous_temp = db.execute(
+        #"SELECT sat_T_c FROM ? WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1",
+        table_name, pressure, temperature
+    )
+    next_temp = immediate_temp[0]["sat_T_c"]
+    prev_temp = previous_temp[0]["sat_T_c"]
+    return next_temp, prev_temp
+'''
+
 @app.route("/heatedtwo", methods=["GET", "POST"])
 def heatedtwo():
     if request.method == "POST":
@@ -354,8 +369,108 @@ def heatedtwo():
         # Find for a given temperature the immediate pressure and the previous pressure
         # Find for a given temperature AND those pressures selected, the thermodynamic properties
         # Perform linear interpolation
-        return apology("TODO")
+
+        # Get user input
+        selection = request.form.get("calcType")
+        # This changes in HTML form so make it dynamic later
+        
+        #pressure = request.form.get("pressure")
+        temperature = request.form.get("temperature")
+
+        # Check if the fields are empty
+        if not temperature and not thermodynamic_property:
+            return apology("Enter both fields")
+        # Check if the input are numbers
+        try:
+            temperature = float(temperature)
+        except ValueError:
+            return apology("Enter valid positive numbers for temperature")
+
+        # Duplicate from heated()
+        super_heated_data = db.execute("SELECT p, sat_T_c, v, u, h, s FROM super_heated_steam")
+        critical_heated_data = db.execute("SELECT p, sat_T_c, v, h, s FROM critical_heated_steam")
+        combined = super_heated_data + critical_heated_data
+
+
+        valid_super_temps = []
+        for a in super_heated_data:
+            valid_super_temps.append(a["sat_T_c"])
+
+        all_v = []
+        for b in super_heated_data:
+            all_v.append(b["v"])
+        filtered_v = [value for value in all_v if value is not None]
+
+        if filtered_v:
+            smallest_v = min(filtered_v)
+            largest_v = max(filtered_v)
+            # print("Smallest specific volume:", smallest_v)
+            # print("Largest specific volume:", largest_v)
+        else:
+            # print("The list 'all_v' contains None values or is empty.")
+            return apology("Error")
+        
+
+        if selection == "specific_volume":
+            # Check if input is a number and positive
+            thermodynamic_property = request.form.get("specificVolume")
+            try:
+                thermodynamic_property = float(thermodynamic_property)
+            except ValueError:
+                return apology("Enter a number")
+            if thermodynamic_property < 0:
+                return apology("Specific volume must be positive")
+
+            # Does the value of specific volume already correspond to a pressure in the table?
+            ### Need to also handle the case where v exists but not at the right temperature ###
+            # Handle the case where only valid temps are allowed...crosslink between temperature interpolater?
+            # Handle the None case
+
+            p_exists = None
+            for i in combined:
+                if i["v"] == thermodynamic_property and i["sat_T_c"] == temperature:
+                    p_exists = i["p"]
+                    break
+            if p_exists is not None:
+                return render_template("pressureexists.html", p_exists=p_exists)
+
+            #for q in super_heated_data:
+             #   if 0.5 <= q["p"] <= 4 and q["v"] is None and temperature == 50:
+              #  #if q["v"] is None and temperature == 50: #q["sat_T_c"] == 50:
+               #     return apology("No thermodynamic properties in this pressure range for this temperature")
+            
+
+            if thermodynamic_property >= smallest_v and thermodynamic_property <= largest_v:
+                if temperature in valid_super_temps:
+                    pressureone = db.execute("SELECT p FROM super_heated_steam WHERE sat_T_c = ? AND v < ? ORDER BY p LIMIT 1", temperature, thermodynamic_property)
+                    pressurezero = db.execute("SELECT p FROM super_heated_steam WHERE sat_T_c = ? AND v > ? ORDER BY p DESC LIMIT 1", temperature, thermodynamic_property)
+                    # Check for None v
+                    if pressureone:
+                        p_one = pressureone[0]["p"]
+                    else:
+                        return apology("No pressure for the specificed temperature and specifc volume")
+                    if pressurezero:
+                        p_zero = pressurezero[0]["p"]
+                    else:
+                        return apology("No pressure for the specificed temperature and specifc volume")
+                    specific_volume_one = db.execute("SELECT v FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", temperature, p_one)
+                    specific_volume_zero = db.execute("SELECT v FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", temperature, p_zero)
+                    v_one = specific_volume_one[0]["v"]
+                    v_zero = specific_volume_zero[0]["v"]
+                    p_interp = ((thermodynamic_property - v_zero) / (v_one - v_zero)) * (p_one - p_zero) + p_zero
+                    return render_template("pressureinterp.html", p_interp=p_interp, thermodynamic_property=thermodynamic_property, v_one=v_one, v_zero=v_zero, p_one=p_one, p_zero=p_zero)
+                else:
+                    return apology("Not a valid temperature, perhaps use the Linear Temperature Interpolater first?")
+
+        else:
+            return apology("TODO")
     else:
+        super_heated_data = db.execute("SELECT p, sat_T_c, v, u, h, s FROM super_heated_steam")
+        all_v = []
+        for b in super_heated_data:
+            all_v.append(b["v"])
+
+        
         return render_template("heatedtwo.html")
 
 @app.route("/adibatic", methods=["GET", "POST"])

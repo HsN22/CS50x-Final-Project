@@ -17,23 +17,26 @@
 
 
     <!--Is hardcoding the options good practice or use for loop, array like in Froshims example?-->
-    <form action="/heated" method="POST">
+    <form action="/heatedtwo" method="POST">
         <label for="calcType">Calculate:</label>
         <select id="calcType" name="calcType">
             <option enabled selected>Property</option>
             <option value="specific_volume">Specific Volume</option>
-            <!--More properties later-->
             <option value="internal_energy">Internal Energy</option>
             <option value="specific_enthalpy">Specific Enthalpy</option>
             <option value="specific_entropy">Specific Entropy</option>
         </select>
         
         <div id="inputContainer" style="display: none; margin-top: 20px;">
-            
+
+            <div class="mb-3">
+                <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="value" name="valuetwo" placeholder="Property" type="text">
+            </div>
+            <!--
             <div class="mb-3">
                 <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="pressure" name="pressure" placeholder="Pressure (Bar)" type="text">
             </div>
-            
+            -->
             <div class="mb-3">
                 <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="temperature" name="temperature" placeholder="Temperature (°C)" type="text">
             </div>
@@ -46,16 +49,46 @@
     <script>
         const calcTypeSelect = document.getElementById('calcType');
         const inputContainer = document.getElementById('inputContainer');
+        const thirdInput = document.getElementById('value');  // Change this ID to match the ID of the third input field
 
         calcTypeSelect.addEventListener('change', function() {
             const selectedOption = calcTypeSelect.value;
 
             if (selectedOption === 'specific_volume' || selectedOption === 'internal_energy' || selectedOption === 'specific_enthalpy' || selectedOption === 'specific_entropy') {
                 inputContainer.style.display = 'block';
+                
+                // Change the id, name, and placeholder for the third input based on the selected property
+                switch (selectedOption) {
+                    case 'specific_volume':
+                        thirdInput.id = 'specificVolume';  // Change the ID
+                        thirdInput.name = 'specificVolume';  // Change the name
+                        thirdInput.placeholder = 'Specific Volume';
+                        break;
+                    case 'internal_energy':
+                        thirdInput.id = 'internalEnergy';  // Change the ID
+                        thirdInput.name = 'internalEnergy';  // Change the name
+                        thirdInput.placeholder = 'Internal Energy';
+                        break;
+                    case 'specific_enthalpy':
+                        thirdInput.id = 'specificEnthalpy';  // Change the ID
+                        thirdInput.name = 'specificEnthalpy';  // Change the name
+                        thirdInput.placeholder = 'Specific Enthalpy';
+                        break;
+                    case 'specific_entropy':
+                        thirdInput.id = 'specificEntropy';  // Change the ID
+                        thirdInput.name = 'specificEntropy';  // Change the name
+                        thirdInput.placeholder = 'Specific Entropy';
+                        break;
+                    default:
+                        thirdInput.id = 'value';  // Change the ID back to the default
+                        thirdInput.name = 'valuetwo';  // Change the name back to the default
+                        thirdInput.placeholder = 'Property';
+                }
             } else {
                 inputContainer.style.display = 'none';
             }
         });
     </script>
+
 
 {% endblock %}

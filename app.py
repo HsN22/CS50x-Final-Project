@@ -429,7 +429,7 @@ def heatedtwo():
                     break
             if p_exists is not None:
                 return render_template("pressureexists.html", p_exists=p_exists)
-
+            # Do I need this line below?
             if thermodynamic_property >= smallest_v and thermodynamic_property <= largest_v:
                 if temperature in valid_super_temps:
                     pressureone = db.execute("SELECT p FROM super_heated_steam WHERE sat_T_c = ? AND v < ? ORDER BY p LIMIT 1", temperature, thermodynamic_property)
@@ -451,8 +451,145 @@ def heatedtwo():
                     return render_template("pressureinterp.html", p_interp=p_interp, thermodynamic_property=thermodynamic_property, v_one=v_one, v_zero=v_zero, p_one=p_one, p_zero=p_zero)
                 else:
                     return apology("Not a valid temperature, perhaps use the Linear Temperature Interpolater first?")
+        elif selection == "internal_energy":
+            # Check if input is a number and positive
+            thermodynamic_property = request.form.get("internalEnergy")
+            try:
+                thermodynamic_property = float(thermodynamic_property)
+            except ValueError:
+                return apology("Enter a number")
+            if thermodynamic_property < 0:
+                return apology("Internal energy must be positive")
+
+            # Does the value of internal energy already correspond to a pressure in the table?
+            ### Need to also handle the case where u exists but not at the right temperature ###
+            # Handle the case where only valid temps are allowed...crosslink between temperature interpolater?
+            # Handle the None case
+
+            p_exists = None
+            for i in super_heated_data:
+                if i["u"] == thermodynamic_property and i["sat_T_c"] == temperature:
+                    p_exists = i["p"]
+                    break
+            if p_exists is not None:
+                return render_template("pressureexists.html", p_exists=p_exists)
+                
+            if temperature in valid_super_temps:
+                pressureone = db.execute("SELECT p FROM super_heated_steam WHERE sat_T_c = ? AND u < ? ORDER BY p LIMIT 1", temperature, thermodynamic_property)
+                pressurezero = db.execute("SELECT p FROM super_heated_steam WHERE sat_T_c = ? AND u > ? ORDER BY p DESC LIMIT 1", temperature, thermodynamic_property)
+                
+                # Check for None v
+                if pressureone:
+                    p_one = pressureone[0]["p"]
+                else:
+                    return apology("No pressure for the specificed temperature and Internal energy")
+                if pressurezero:
+                    p_zero = pressurezero[0]["p"]
+                else:
+                    return apology("No pressure for the specificed temperature and Internal energy")
+
+                internal_energy_one = db.execute("SELECT u FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", temperature, p_one)
+                internal_energy_zero = db.execute("SELECT u FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", temperature, p_zero)
+                u_one = internal_energy_one[0]["u"]
+                u_zero = internal_energy_zero[0]["u"]
+                p_interp = ((thermodynamic_property - u_zero) / (u_one - u_zero)) * (p_one - p_zero) + p_zero
+                return render_template("upressinterp.html", p_interp=p_interp, thermodynamic_property=thermodynamic_property, u_one=u_one, u_zero=u_zero, p_one=p_one, p_zero=p_zero)
+            else:
+                return apology("Not a valid temperature, perhaps use the Linear Temperature Interpolater first?")
+        elif selection == "specific_enthalpy":
+            # Check if input is a number and positive
+            thermodynamic_property = request.form.get("specificEnthalpy")
+            try:
+                thermodynamic_property = float(thermodynamic_property)
+            except ValueError:
+                return apology("Enter a number")
+            if thermodynamic_property < 0:
+                return apology("Specific enthalpy must be positive")
+
+            # Does the value of internal energy already correspond to a pressure in the table?
+            ### Need to also handle the case where u exists but not at the right temperature ###
+            # Handle the case where only valid temps are allowed...crosslink between temperature interpolater?
+            # Handle the None case
+
+            p_exists = None
+            for i in super_heated_data:
+                if i["h"] == thermodynamic_property and i["sat_T_c"] == temperature:
+                    p_exists = i["p"]
+                    break
+            if p_exists is not None:
+                return render_template("pressureexists.html", p_exists=p_exists)
+                
+            if temperature in valid_super_temps:
+                pressureone = db.execute("SELECT p FROM super_heated_steam WHERE sat_T_c = ? AND u < ? ORDER BY p LIMIT 1", temperature, thermodynamic_property)
+                pressurezero = db.execute("SELECT p FROM super_heated_steam WHERE sat_T_c = ? AND u > ? ORDER BY p DESC LIMIT 1", temperature, thermodynamic_property)
+                
+                # Check for None v
+                if pressureone:
+                    p_one = pressureone[0]["p"]
+                else:
+                    return apology("No pressure for the specificed temperature and specific enthalpy")
+                if pressurezero:
+                    p_zero = pressurezero[0]["p"]
+                else:
+                    return apology("No pressure for the specificed temperature and specifc enthalpy")
+
+                specific_enthalpy_one = db.execute("SELECT h FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", temperature, p_one)
+                specific_enthalpy_zero = db.execute("SELECT h FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", temperature, p_zero)
+                h_one = specific_enthalpy_one[0]["h"]
+                h_zero = specific_enthalpy_zero[0]["h"]
+                p_interp = ((thermodynamic_property - h_zero) / (h_one - h_zero)) * (p_one - p_zero) + p_zero
+                # Make hpressinterp.html
+                return render_template("hpressinterp.html", p_interp=p_interp, thermodynamic_property=thermodynamic_property, h_one=h_one, h_zero=h_zero, p_one=p_one, p_zero=p_zero)
+            else:
+                return apology("Not a valid temperature, perhaps use the Linear Temperature Interpolater first?")
+        elif selection == "specific_entropy":
+            # Check if input is a number and positive
+            thermodynamic_property = request.form.get("specificEntropy")
+            try:
+                thermodynamic_property = float(thermodynamic_property)
+            except ValueError:
+                return apology("Enter a number")
+            if thermodynamic_property < 0:
+                return apology("Specific Entropy must be positive")
+
+            # Does the value of internal energy already correspond to a pressure in the table?
+            ### Need to also handle the case where u exists but not at the right temperature ###
+            # Handle the case where only valid temps are allowed...crosslink between temperature interpolater?
+            # Handle the None case
+
+            p_exists = None
+            for i in super_heated_data:
+                if i["s"] == thermodynamic_property and i["sat_T_c"] == temperature:
+                    p_exists = i["p"]
+                    break
+            if p_exists is not None:
+                return render_template("pressureexists.html", p_exists=p_exists)
+                
+            if temperature in valid_super_temps:
+                pressureone = db.execute("SELECT p FROM super_heated_steam WHERE sat_T_c = ? AND u < ? ORDER BY p LIMIT 1", temperature, thermodynamic_property)
+                pressurezero = db.execute("SELECT p FROM super_heated_steam WHERE sat_T_c = ? AND u > ? ORDER BY p DESC LIMIT 1", temperature, thermodynamic_property)
+                
+                # Check for None v
+                if pressureone:
+                    p_one = pressureone[0]["p"]
+                else:
+                    return apology("No pressure for the specificed temperature and specific entropy")
+                if pressurezero:
+                    p_zero = pressurezero[0]["p"]
+                else:
+                    return apology("No pressure for the specificed temperature and specifc entropy")
+
+                specific_entropy_one = db.execute("SELECT s FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", temperature, p_one)
+                specific_entropy_zero = db.execute("SELECT s FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", temperature, p_zero)
+                s_one = specific_entropy_one[0]["s"]
+                s_zero = specific_entropy_zero[0]["s"]
+                p_interp = ((thermodynamic_property - s_zero) / (s_one - s_zero)) * (p_one - p_zero) + p_zero
+                # Make spressinterp.html
+                return render_template("spressinterp.html", p_interp=p_interp, thermodynamic_property=thermodynamic_property, s_one=s_one, s_zero=s_zero, p_one=p_one, p_zero=p_zero)
+            else:
+                return apology("Not a valid temperature, perhaps use the Linear Temperature Interpolater first?")
         else:
-            return apology("TODO")
+            return apology("No valid selection made")
     else:    
         return render_template("heatedtwo.html")
 
@@ -534,11 +671,11 @@ def heatedtwosc():
                     if pressureone:
                         p_one = pressureone[0]["p"]
                     else:
-                        return apology("No pressure for the specificed temperature and specifc volume")
+                        return apology("No pressure for the specificed temperature and Specific Volume")
                     if pressurezero:
                         p_zero = pressurezero[0]["p"]
                     else:
-                        return apology("No pressure for the specificed temperature and specifc volume")
+                        return apology("No pressure for the specificed temperature and Specific Volume")
                     specific_volume_one = db.execute("SELECT v FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", temperature, p_one)
                     specific_volume_zero = db.execute("SELECT v FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", temperature, p_zero)
                     v_one = specific_volume_one[0]["v"]
@@ -548,7 +685,95 @@ def heatedtwosc():
                 else:
                     return apology("Not a valid temperature, perhaps use the Linear Temperature Interpolater first?")
             else:
-                return apology("Specific volume for specified temperature does not exist in tables, with our without interpolation")
+                return apology("Specific volume for specified temperature does not exist in tables, with or without interpolation")
+        elif selection == "specific_enthalpy":
+            # Check if input is a number and positive
+            thermodynamic_property = request.form.get("specificEnthalpy")
+            try:
+                thermodynamic_property = float(thermodynamic_property)
+            except ValueError:
+                return apology("Enter a number")
+            if thermodynamic_property < 0:
+                return apology("Specific volume must be positive")
+
+            # Does the value of specific volume already correspond to a pressure in the table?
+            ### Need to also handle the case where v exists but not at the right temperature ###
+            # Handle the case where only valid temps are allowed...crosslink between temperature interpolater?
+            # Handle the None case
+
+            p_exists = None
+            for i in critical_heated_data:
+                if i["h"] == thermodynamic_property and i["sat_T_c"] == temperature:
+                    p_exists = i["p"]
+                    break
+            if p_exists is not None:
+                return render_template("pressureexistssc.html", p_exists=p_exists)            
+
+            
+            if temperature in valid_critical_temps:
+                pressureone = db.execute("SELECT p FROM critical_heated_steam WHERE sat_T_c = ? AND v < ? ORDER BY p LIMIT 1", temperature, thermodynamic_property)
+                pressurezero = db.execute("SELECT p FROM critical_heated_steam WHERE sat_T_c = ? AND v > ? ORDER BY p DESC LIMIT 1", temperature, thermodynamic_property)
+                # Check for None values
+                if pressureone:
+                    p_one = pressureone[0]["p"]
+                else:
+                    return apology("No pressure for the specificed temperature and Specific Enthalpy")
+                if pressurezero:
+                    p_zero = pressurezero[0]["p"]
+                else:
+                    return apology("No pressure for the specificed temperature and Specific Enthalpy")
+                specific_enthalpy_one = db.execute("SELECT h FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", temperature, p_one)
+                specific_enthalpy_zero = db.execute("SELECT h FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", temperature, p_zero)
+                h_one = specific_enthalpy_one[0]["h"]
+                h_zero = specific_enthalpy_zero[0]["h"]
+                p_interp = ((thermodynamic_property - h_zero) / (h_one - h_zero)) * (p_one - p_zero) + p_zero
+                return render_template("hpressinterp.html", p_interp=p_interp, thermodynamic_property=thermodynamic_property, h_one=h_one, h_zero=h_zero, p_one=p_one, p_zero=p_zero) 
+            else:
+                return apology("Not a valid temperature, perhaps use the Linear Temperature Interpolater first?")   
+        elif selection == "specific_entropy":
+            # Check if input is a number and positive
+            thermodynamic_property = request.form.get("specificEntropy")
+            try:
+                thermodynamic_property = float(thermodynamic_property)
+            except ValueError:
+                return apology("Enter a number")
+            if thermodynamic_property < 0:
+                return apology("Specific volume must be positive")
+
+            # Does the value of specific volume already correspond to a pressure in the table?
+            ### Need to also handle the case where v exists but not at the right temperature ###
+            # Handle the case where only valid temps are allowed...crosslink between temperature interpolater?
+            # Handle the None case
+
+            p_exists = None
+            for i in critical_heated_data:
+                if i["s"] == thermodynamic_property and i["sat_T_c"] == temperature:
+                    p_exists = i["p"]
+                    break
+            if p_exists is not None:
+                return render_template("pressureexistssc.html", p_exists=p_exists)            
+
+            
+            if temperature in valid_critical_temps:
+                pressureone = db.execute("SELECT p FROM critical_heated_steam WHERE sat_T_c = ? AND v < ? ORDER BY p LIMIT 1", temperature, thermodynamic_property)
+                pressurezero = db.execute("SELECT p FROM critical_heated_steam WHERE sat_T_c = ? AND v > ? ORDER BY p DESC LIMIT 1", temperature, thermodynamic_property)
+                # Check for None values
+                if pressureone:
+                    p_one = pressureone[0]["p"]
+                else:
+                    return apology("No pressure for the specificed temperature and Specific Entropy")
+                if pressurezero:
+                    p_zero = pressurezero[0]["p"]
+                else:
+                    return apology("No pressure for the specificed temperature and Specific Entropy")
+                specific_entropy_one = db.execute("SELECT s FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", temperature, p_one)
+                specific_entropy_zero = db.execute("SELECT s FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", temperature, p_zero)
+                s_one = specific_entropy_one[0]["s"]
+                s_zero = specific_entropy_zero[0]["s"]
+                p_interp = ((thermodynamic_property - s_zero) / (s_one - s_zero)) * (p_one - p_zero) + p_zero
+                return render_template("spressinterp.html", p_interp=p_interp, thermodynamic_property=thermodynamic_property, s_one=s_one, s_zero=s_zero, p_one=p_one, p_zero=p_zero) 
+            else:
+                return apology("Not a valid temperature, perhaps use the Linear Temperature Interpolater first?") 
         else:
             return apology("TODO")
     else:

@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Pressure Linear Interpolater Result
+{% endblock %}
+
+{% block main %}
+    
+    <p>The pressure is {{ p_interp }}</p>
+    <p>h is {{ thermodynamic_property }}</p>
+    <p>p1 is {{ p_one }}</p>
+    <p>p0 is {{ p_zero }}</p>
+    <p>h1 is {{ h_one }}</p>
+    <p>h0 is {{ h_zero }}</p>
+
+{% endblock %}

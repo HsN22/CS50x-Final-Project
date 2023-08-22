@@ -13,7 +13,8 @@
     </p>
     <p>
        Note that only Temperature values seen in the Superheated and Supercritical tables will work.
-       A Temperature interpolater is needed if the Temperature value is within the range as seen in the tables but not exactly the ones on there. 
+       Use the Temperature Interpolater to find the thermodynamic property at a Temperature that is between the ones in the table first.
+       Then use this calculator to find the Pressure at that thermodynamic property. 
     </p>
 
 
@@ -23,7 +24,6 @@
         <select id="calcType" name="calcType">
             <option enabled selected>Property</option>
             <option value="specific_volume">Specific Volume</option>
-            <option value="internal_energy">Internal Energy</option>
             <option value="specific_enthalpy">Specific Enthalpy</option>
             <option value="specific_entropy">Specific Entropy</option>
         </select>
@@ -64,11 +64,6 @@
                         thirdInput.id = 'specificVolume';  // Change the ID
                         thirdInput.name = 'specificVolume';  // Change the name
                         thirdInput.placeholder = 'Specific Volume';
-                        break;
-                    case 'internal_energy':
-                        thirdInput.id = 'internalEnergy';  // Change the ID
-                        thirdInput.name = 'internalEnergy';  // Change the name
-                        thirdInput.placeholder = 'Internal Energy';
                         break;
                     case 'specific_enthalpy':
                         thirdInput.id = 'specificEnthalpy';  // Change the ID

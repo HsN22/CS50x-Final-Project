@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Superheated Pressure Interpolater</h1>
+    <h1>Supercritical Pressure Interpolater</h1>
     <p>
        Calculate a thermodynamic property that is found in the Superheated and Supercritical tables for a given Pressure and Temperature.
        If the Pressure and the thermodynamic property is not found within the tables but lies in a valid Temperature and Pressure range,
@@ -18,7 +18,7 @@
 
 
     <!--Is hardcoding the options good practice or use for loop, array like in Froshims example?-->
-    <form action="/heatedtwo" method="POST">
+    <form action="/heatedtwosc" method="POST">
         <label for="calcType">Calculate:</label>
         <select id="calcType" name="calcType">
             <option enabled selected>Property</option>

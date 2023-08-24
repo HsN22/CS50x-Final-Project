@@ -1,16 +1,16 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Result Two
+    Interpolated Specific Volume
 {% endblock %}
 
 {% block main %}
 
-    <p>T1 is {{ next_temp }} C</p> 
-    <p>T0 is {{ prev_temp }} C</p>
-    <p>V1 is {{ next_v }} m3/kg</p> 
-    <p>V0 is {{ prev_v }} m3/kg</p>
+    <p>T<sub>1</sub> is {{ next_temp }} °C</p> 
+    <p>T<sub>0</sub> is {{ prev_temp }} °C</p>
+    <p>v<sub>1</sub> is {{ next_v }} m3/kg</p> 
+    <p>v<sub>0</sub> is {{ prev_v }} m3/kg</p>
 
-    <p>Interpolated specific volume is {{ v_interp }} m3/kg</p>
+    <p><strong>Interpolated Specific Volume is {{ v_interp }} m3/kg</strong></p>
     
 {% endblock %}

@@ -1,19 +1,18 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Pressure Superheated & Critical Steam
+    Pressure Supercritical Table
 {% endblock %}
 
 {% block main %}
     <h1>Superheated Pressure Interpolater</h1>
     <p>
-       Calculate a thermodynamic property that is found in the Superheated and Supercritical tables for a given Pressure and Temperature.
-       If the Pressure and the thermodynamic property is not found within the tables but lies in a valid Temperature and Pressure range,
-       i.e the Pressure range seen in the tables, linear interpolation is used to calculate the thermodynamic property.
+       Find a thermodynamic property that is found in the Superheated tables for a given thermodynamic property and Temperature.
+       If the Pressure is not found within the tables but lies in a valid Pressure range,
+       i.e the Pressure range seen in the tables, linear interpolation is used to calculate the Pressure.
     </p>
     <p>
-       Note that only Temperature values seen in the Superheated and Supercritical tables will work.
-       A Temperature interpolater is needed if the Temperature value is within the range as seen in the tables but not exactly the ones on there. 
+       Note that only Temperature values seen in the Superheated tables will work.
     </p>
 
 

@@ -1,14 +1,14 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Result
+    Saturated Pressure Result
 {% endblock %}
 
 {% block main %}
     <div>
-        <p>The pressure using tables is {{ pressure }} bar</p>
-        <p>The pressure using the Arden Buck equation is {{ Buck_pressure }} bar</p>
-        <p>The pressure using the Affandi equation is {{ Affandi_press }} bar</p>
+        <p><strong>The Pressure using tables is {{ pressure }} bar</strong></p>
+        <p><b>The Pressure using the Arden Buck equation is {{ Buck_pressure }} bar</b></p>
+        <p><b>The Pressure using the Affandi equation is {{ Affandi_press }} bar</b></p>
     </div>
 
     <h2 style="margin-top: 40px;">Error Graph</h2>

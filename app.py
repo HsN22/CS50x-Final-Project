@@ -167,8 +167,14 @@ def get_immediate_and_previous_temps(table_name, pressure, temperature):
         "SELECT sat_T_c FROM ? WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1",
         table_name, pressure, temperature
     )
-    next_temp = immediate_temp[0]["sat_T_c"]
-    prev_temp = previous_temp[0]["sat_T_c"]
+    if immediate_temp:
+        next_temp = immediate_temp[0]["sat_T_c"]
+    else:
+        return apology("No data for this Pressure and Temperature point")
+    if previous_temp:
+        prev_temp = previous_temp[0]["sat_T_c"]
+    else:
+        return apology("No data for this Pressure and Temperature point")
     return next_temp, prev_temp
 
 @app.route("/heated", methods=["GET", "POST"])
@@ -220,7 +226,7 @@ def heated():
                     break
             if vol is not None:
                 return render_template("resultstwoexisting.html", v_exists=vol)
-            if (pressure >= 0 and pressure <= 4 and temperature >= 50 and temperature not in unacceptable) or (pressure >= 5 and pressure <= 221.2 and temperature >= 200):
+            if (pressure >= 0 and pressure <= 4 and temperature >= 50 ) or (pressure >= 5 and pressure <= 221.2 and temperature >= 200):
                 next_temp, prev_temp = get_immediate_and_previous_temps("super_heated_steam", pressure, temperature)
                 #immediate_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c > ? ORDER BY sat_T_c LIMIT 1", pressure, temperature)
                 #previous_temp = db.execute("SELECT sat_T_c FROM super_heated_steam WHERE p = ? AND sat_T_c < ? ORDER BY sat_T_c DESC LIMIT 1", pressure, temperature)
@@ -228,8 +234,14 @@ def heated():
                 #prev_temp = previous_temp[0]["sat_T_c"]
                 immediate_v = db.execute("SELECT v FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", next_temp, pressure)
                 previous_v = db.execute("SELECT v FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", prev_temp, pressure)
-                next_v = immediate_v[0]["v"]
-                prev_v = previous_v[0]["v"]
+                if immediate_v:
+                    next_v = immediate_v[0]["v"]
+                else:
+                    return apology("No data available for this Pressure and Temperature")
+                if previous_v:
+                    prev_v = previous_v[0]["v"]
+                else:
+                    return apology("No data available for this Pressure and Temperature")
                 v_interp = ((temperature - prev_temp) / (next_temp - prev_temp)) * (next_v - prev_v) + prev_v
                 return render_template("resultstwo.html", next_temp=next_temp, prev_temp=prev_temp, next_v=next_v, prev_v=prev_v, v_interp=v_interp)
             elif (pressure >= 225 and pressure <= 1000 and temperature >= 350):
@@ -240,8 +252,14 @@ def heated():
                 #prev_tempsc = previous_tempsc[0]["sat_T_c"]
                 immediate_vsc = db.execute("SELECT v FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", next_tempsc, pressure)
                 previous_vsc = db.execute("SELECT v FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", prev_tempsc, pressure)
-                next_vsc = immediate_vsc[0]["v"]
-                prev_vsc = previous_vsc[0]["v"]
+                if immediate_vsc:
+                    next_vsc = immediate_vsc[0]["v"]
+                else:
+                    return apology("No data available for this Pressure and Temperature")
+                if previous_vsc:
+                    prev_vsc = previous_vsc[0]["v"]
+                else:
+                    return apology("No data available for this Pressure and Temperature")
                 v_interpsc = ((temperature - prev_tempsc) / (next_tempsc - prev_tempsc)) * (next_vsc - prev_vsc) + prev_vsc
                 return render_template("resultstwosc.html", next_tempsc=next_tempsc, prev_tempsc=prev_tempsc, next_vsc=next_vsc, prev_vsc=prev_vsc, v_interpsc=v_interpsc)
             else:
@@ -265,8 +283,14 @@ def heated():
                 #prev_temp = previous_temp[0]["sat_T_c"]
                 immediate_u = db.execute("SELECT u FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", next_temp, pressure)
                 previous_u = db.execute("SELECT u FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", prev_temp, pressure)
-                next_u = immediate_u[0]["u"]
-                prev_u = previous_u[0]["u"]
+                if immediate_u:
+                    next_u = immediate_u[0]["u"]
+                else:
+                    return apology("No data available for this Pressure and Temperature")
+                if previous_u:
+                    prev_u = previous_u[0]["u"]
+                else:
+                    return apology("No data available for this Pressure and Temperature")
                 u_interp = ((temperature - prev_temp) / (next_temp - prev_temp)) * (next_u - prev_u) + prev_u
                 return render_template("uresultstwo.html", next_temp=next_temp, prev_temp=prev_temp, next_u=next_u, prev_u=prev_u, u_interp=u_interp)
             elif (pressure >= 80 and pressure <= 1000 and temperature >= 350):
@@ -291,8 +315,14 @@ def heated():
                 #prev_temp = previous_temp[0]["sat_T_c"]
                 immediate_h = db.execute("SELECT h FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", next_temp, pressure)
                 previous_h = db.execute("SELECT h FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", prev_temp, pressure)
-                next_h = immediate_h[0]["h"]
-                prev_h = previous_h[0]["h"]
+                if immediate_h:
+                    next_h = immediate_h[0]["h"]
+                else:
+                    return apology("No data available for this Pressure and Temperature")
+                if previous_h:
+                    prev_h = previous_h[0]["h"]
+                else:
+                    return apology("No data available for this Pressure and Temperature")
                 h_interp = ((temperature - prev_temp) / (next_temp - prev_temp)) * (next_h - prev_h) + prev_h
                 return render_template("hresultstwo.html", next_temp=next_temp, prev_temp=prev_temp, next_h=next_h, prev_h=prev_h, h_interp=h_interp)
             elif (pressure >= 225 and pressure <= 1000 and temperature >= 350):
@@ -303,8 +333,14 @@ def heated():
                 #prev_tempsc = previous_tempsc[0]["sat_T_c"]
                 immediate_hsc = db.execute("SELECT h FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", next_tempsc, pressure)
                 previous_hsc = db.execute("SELECT h FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", prev_tempsc, pressure)
-                next_hsc = immediate_hsc[0]["h"]
-                prev_hsc = previous_hsc[0]["h"]
+                if immediate_hsc:
+                    next_hsc = immediate_hsc[0]["h"]
+                else:
+                    return apology("No data available for this Pressure and Temperature")
+                if previous_hsc:
+                    prev_hsc = previous_hsc[0]["h"]
+                else:
+                    return apology("No data available for this Pressure and Temperature")
                 h_interpsc = ((temperature - prev_tempsc) / (next_tempsc - prev_tempsc)) * (next_hsc - prev_hsc) + prev_hsc
                 return render_template("hresultstwosc.html", next_tempsc=next_tempsc, prev_tempsc=prev_tempsc, next_hsc=next_hsc, prev_hsc=prev_hsc, h_interpsc=h_interpsc)
         # Specific entropy interpolater  
@@ -325,8 +361,14 @@ def heated():
                 #prev_temp = previous_temp[0]["sat_T_c"]
                 immediate_s = db.execute("SELECT s FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", next_temp, pressure)
                 previous_s = db.execute("SELECT s FROM super_heated_steam WHERE sat_T_c = ? AND p = ?", prev_temp, pressure)
-                next_s = immediate_s[0]["s"]
-                prev_s = previous_s[0]["s"]
+                if immediate_s:
+                    next_s = immediate_s[0]["s"]
+                else:
+                    return apology("No data available for this Pressure and Temperature")
+                if previous_s:
+                    prev_s = previous_s[0]["s"]
+                else:
+                    return apology("No data available for this Pressure and Temperature")
                 s_interp = ((temperature - prev_temp) / (next_temp - prev_temp)) * (next_s - prev_s) + prev_s
                 return render_template("hresultstwo.html", next_temp=next_temp, prev_temp=prev_temp, next_s=next_s, prev_s=prev_s, s_interp=s_interp)
             elif (pressure >= 225 and pressure <= 1000 and temperature >= 350):
@@ -337,8 +379,14 @@ def heated():
                 #prev_tempsc = previous_tempsc[0]["sat_T_c"]
                 immediate_ssc = db.execute("SELECT s FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", next_tempsc, pressure)
                 previous_ssc = db.execute("SELECT s FROM critical_heated_steam WHERE sat_T_c = ? AND p = ?", prev_tempsc, pressure)
-                next_ssc = immediate_ssc[0]["s"]
-                prev_ssc = previous_ssc[0]["s"]
+                if immediate_ssc:
+                    next_ssc = immediate_ssc[0]["s"]
+                else:
+                    return apology("No data available for this Pressure and Temperature")
+                if previous_ssc:
+                    prev_ssc = previous_ssc[0]["s"]
+                else:
+                    return apology("No data available for this Pressure and Temperature")
                 s_interpsc = ((temperature - prev_tempsc) / (next_tempsc - prev_tempsc)) * (next_ssc - prev_ssc) + prev_ssc
                 return render_template("sresultstwosc.html", next_tempsc=next_tempsc, prev_tempsc=prev_tempsc, next_ssc=next_ssc, prev_ssc=prev_ssc, s_interpsc=s_interpsc)
         else:

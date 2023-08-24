@@ -1,14 +1,14 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Result
+    Specific Volume of Vapor Result
 {% endblock %}
 
 {% block main %}
 
-    <p>The specific volume using tables is {{ vg_table }} bar</p>
-    <p>The specific volume using the ideal gas equation is {{ v }}</p>
-    <p>The specific volume using the Affandi equation is {{ affandi_v_g }}</p>
+    <p><strong>The specific volume using tables is {{ vg_table }} m3/kg</strong></p>
+    <p><b>The specific volume using the ideal gas equation is {{ v }} m3/kg</b></p>
+    <p><b>The specific volume using the Affandi equation is {{ affandi_v_g }} m3/kg</b></p>
     
     <h2 style="margin-top: 40px;">Error Graph</h2>
     <img src="{{ url_for('static', filename='error_graph.png') }}" alt="Error Graph">

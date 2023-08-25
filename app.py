@@ -370,6 +370,7 @@ def heated():
                 else:
                     return apology("No data available for this Pressure and Temperature")
                 s_interp = ((temperature - prev_temp) / (next_temp - prev_temp)) * (next_s - prev_s) + prev_s
+                ####################################WHAT?
                 return render_template("hresultstwo.html", next_temp=next_temp, prev_temp=prev_temp, next_s=next_s, prev_s=prev_s, s_interp=s_interp)
             elif (pressure >= 225 and pressure <= 1000 and temperature >= 350):
                 next_tempsc, prev_tempsc = get_immediate_and_previous_temps("critical_heated_steam", pressure, temperature)

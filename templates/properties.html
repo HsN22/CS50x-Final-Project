@@ -111,6 +111,7 @@
                         <td>{{ data.sat_T_c }}</td>
                         <td>{{ data.v }}</td>
                         <td>{{ data.h }}</td>
+                        <td>{{ data.s }}</td>
                     </tr>
                 {% endfor %}`
             };
@@ -134,7 +135,7 @@
                 temperatureL: "<th>Temperature (°C)</th><th>Pressure (bar)</th><th>Volume (m3/kg)</th><th>Internal Energy (kJ/kg)</th><th>Enthalpy (kJ/kg)</th><th>Entropy (J/g*K)</th><th>Phase</th>",
                 temperatureV: "<th>Temperature (°C)</th><th>Pressure (bar)</th><th>Volume (m3/kg)</th><th>Internal Energy (kJ/kg)</th><th>Enthalpy (kJ/kg)</th><th>Entropy (J/g*K)</th><th>Phase</th>",
                 superheatedSteam: "<th>Pressure (bar)</th><th>Saturation Temperature (°C)</th><th>Volume (m3/kg)</th><th>Internal Energy (kJ/kg)</th><th>Enthalpy (kJ/kg)</th><th>Entropy (kJ/kg*K)</th>",
-                supercriticalSteam: "<th>Pressure (bar)</th><th>Saturation Temperature (°C)</th><th>Volume (m3/kg)</th><th>Enthalpy (kJ/kg)</th>"
+                supercriticalSteam: "<th>Pressure (bar)</th><th>Saturation Temperature (°C)</th><th>Volume (m3/kg)</th><th>Enthalpy (kJ/kg)</th><th>Entropy (kJ/kg*K)</th>"
             };
 
             return headerColumns[selectedValue] || "";
